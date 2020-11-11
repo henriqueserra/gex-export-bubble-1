@@ -11,11 +11,11 @@ const VendasBubbleSchema = new Schema({
     numeroCaixa: Number,
     destCPF: String,
     destCNPJ: String,
-    produto: String,
-    preco: Number,
+    produto: [String],
+    preco: [Number],
     valortotal: Number,
-    meiopagamento: String,
-    valormeiopagamento: Number
+    meiopagamento: [String],
+    valormeiopagamento: [Number]
 }, {
     collection: 'Export-bubble'
 });
