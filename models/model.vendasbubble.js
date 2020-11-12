@@ -15,7 +15,8 @@ const VendasBubbleSchema = new Schema({
     preco: Number,
     valortotal: Number,
     meiopagamento: String,
-    valormeiopagamento: Number
+    valormeiopagamento: Number,
+    processado: Boolean
 }, {
     collection: 'vendas'
 });

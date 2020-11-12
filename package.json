@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/henriqueserra/gex-export-bubble-1#readme",
   "dependencies": {
+    "axios": "^0.21.0",
     "body-parser": "^1.19.0",
     "consign": "^0.1.6",
     "cors": "^2.8.5",
