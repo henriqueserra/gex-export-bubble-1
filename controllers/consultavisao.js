@@ -20,7 +20,7 @@ module.exports = app => {
 
     app.get('/export-bubble/data/:data', (req, res) => {
         console.log(req.params.data);
-        ExportVisao.find({criado: {$gt: new Date(req.params.data)}}).sort({'criado': 1}).limit(5)
+        ExportVisao.find({criado: {$gt: new Date(req.params.data)}}).sort({'criado': 1}).limit(200)
           .exec((erro, resultados) => {
             if (erro) {
                 console.log('Erro lendo Vendas ' + err);
