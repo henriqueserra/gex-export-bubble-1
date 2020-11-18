@@ -17,9 +17,9 @@ module.exports = app => {
     app.get('/buscavendaveis', async (requisicao, resposta) =>{
         await buscaEstabalecimentoBubble({'CNPJ' : golbalCNPJ})
         dados = await buscaVendaveis()
-        console.log(dados.response)
+        console.log(globalVENDAVEIS)
         resposta.status(200)
-        resposta.send(dados.response)
+        resposta.send(dados)
 
     })
 };
@@ -37,9 +37,14 @@ async function buscaEstabalecimentoBubble(cnpj) {
 async function buscaVendaveis() {
     return new Promise((resolve, reject)=>{
         estabelecimento = globalESTABELECIMENTO;
-        console.log(estabelecimento);
-        axios.post(process.env.API_GEX+process.env.API_VENDAVEIS,estabelecimento)
-        .then((resposta)=>{resolve(resposta)})
+        const rota = process.env.API_GEX+process.env.API_VENDAVEIS
+        // console.log(estabelecimento);
+        // console.log(rota);
+        axios.post(rota,estabelecimento)
+        .then((resposta)=>{
+            // console.log(resposta.data.response);
+            globalVENDAVEIS = resposta.data.response.Vendavel;
+            resolve(resposta.data.response.Vendavel)})
         .catch((erro)=>{reject(erro)})
     });
 }
