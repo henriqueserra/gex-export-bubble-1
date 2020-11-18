@@ -1,5 +1,9 @@
-console.clear();
+require('dotenv/config');
 
+// Declaração de variáveis globais
+global.golbalCNPJ = process.env.ESTABELECIMENTO_CNPJ;
+global.globalESTABELECIMENTO ='';
+global.globalVENDAVEIS=[];
 
 
 // ===============================================
