@@ -3,6 +3,7 @@ const moment = require('moment');
 const ExportVisao = require('../models/model.exportavisao');
 const VendasBubble = require('../models/model.vendasbubble');
 const axios = require('axios');
+const { json } = require('body-parser');
 
 
 // Obtem os dados do MongoDb.
@@ -15,9 +16,31 @@ async function  getDados (){
 // 
 // Transforma em Json o Array retornado pela função getDados()
 function transformaEmJson(origem) {
+
     return origem[0];
 }
 // 
+
+function extraiDados(registro) {
+    let registroJson=[]
+    let registroTemporario={};
+    const quantidade = Object.keys(registro.produto).length;
+    console.log(registro);
+    for (let index = 0; index < quantidade; index++) {
+        registroTemporario={};
+        registroTemporario=({
+            "Nota_Fiscal": registro.nCFe,
+            "Preco_Unitario": registro.preco[index],
+            "Preco_Total": registro.valortotal,
+            "Produto": registro.produto[index],
+            "Quantidade": quantidade,
+            "Usuario": "1601238336708x931805447313282400"
+        })
+        registroJson.push(registroTemporario)
+
+    }
+    console.log(registroJson);
+}
 
 async function enviaDadosBubble(jsonresult) {
     return new Promise ((resolve, reject) =>{
@@ -116,6 +139,7 @@ module.exports = app => {
             var jsonresult = transformaEmJson(dados)
             // 
             // Envia registro para o Bubble
+            var dadosExtraidos = extraiDados(jsonresult)
             resultadodopost = await enviaDadosBubble(jsonresult);
             // 
             // Atualiza o registro no MongoDB 
