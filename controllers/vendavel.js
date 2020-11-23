@@ -12,7 +12,6 @@ module.exports = app => {
 
 
 
-
     // Busca lista de vendaveis
     app.get('/buscavendaveis', async (requisicao, resposta) =>{
         await buscaEstabalecimentoBubble({'CNPJ' : golbalCNPJ})

@@ -15,7 +15,6 @@ async function  getDados (){
 // 
 // Transforma em Json o Array retornado pela função getDados()
 function transformaEmJson(origem) {
-    console.log(origem[0]._id+' Convertido');
     return origem[0];
 }
 // 
