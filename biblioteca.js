@@ -1,4 +1,5 @@
 const axios = require('axios');
+const crud = require('./crud');
 
 
 async function buscaEstabalecimentoBubble() {
@@ -29,30 +30,49 @@ function extraiNotaFiscal(registro) {
     return (NotaFiscalJson);
 }
 
-function extraiVendas(registro) {
+async function extraiVendas(registro, idNotaFiscal) {
     let registroJson=[]
     let registroTemporario={};
     const quantidade = Object.keys(registro.produto).length;
     // console.log(registro);
     for (let index = 0; index < quantidade; index++) {
         registroTemporario={};
+        idVendavel = await trataVendavel(registro.produto[index])
         registroTemporario=({
             "Estabelecimento" : globalESTABELECIMENTO.Estabelecimento,
             "Preco_Unitario": registro.preco[index],
             "Processado" : false,
-            "Produto": registro.produto[index],
+            "Produto": idVendavel,
             "Valor_Venda": registro.preco[index],
             "Quantidade": 1,
-            "Nota_Fiscal": "Incluir o dado Novo"
+            "Nota_Fiscal": idNotaFiscal
         })
         registroJson.push(registroTemporario)
 
     }
-    return(registroJson);
+    return(registroJson)
+}
+
+async function trataVendavel (produto){
+    id='';
+    vendavel = globalVENDAVEIS.find(element => element.produto_text === produto)
+    if (vendavel === undefined) {
+        console.log(produto+' novo vendavel');
+        id = await crud.criaVendavel(produto)
+        console.log(produto+' criado '+ id);
+        console.log('Carregando Vendaveis');
+       await crud.buscaVendaveis();
+       console.log('Vendaveis carregados');
+    } else{
+        id=vendavel._id;
+    }
+
+    return (id);
 }
 
 module.exports = {
     buscaEstabalecimentoBubble : buscaEstabalecimentoBubble,
     extraiNotaFiscal : extraiNotaFiscal,
     extraiVendas : extraiVendas,
+    trataVendavel : trataVendavel,
 }

@@ -5,6 +5,7 @@ const VendasBubble = require('../models/model.vendasbubble');
 const axios = require('axios');
 const { json } = require('body-parser');
 const biblioteca = require('../biblioteca');
+const crud = require('../crud');
 
 
 // Obtem os dados do MongoDb.
@@ -85,17 +86,25 @@ module.exports = app => {
             
             // Gera JSON para NotaFiscal
             notaFiscalExtraida = biblioteca.extraiNotaFiscal(jsonresult);
-            // console.log('Nota Fiscal');
-            // console.log(notaFiscalExtraida);
+            // 
+            // Grava NotaFiscal no Bubbe=le
+            idNotaFiscal = await crud.registraNotaFiscalBubble(JSON.stringify(notaFiscalExtraida));
             // 
 
             // Gera JSON para Vendas
-            vendasExtraida = await biblioteca.extraiVendas(jsonresult);
+            vendasExtraida = await biblioteca.extraiVendas(jsonresult,idNotaFiscal);
             const quantidadeItensVendas = Object.keys(vendasExtraida).length;
             console.log('Vendas');
             console.log(vendasExtraida);
             console.log(quantidadeItensVendas);
+            for (let index = 0; index < quantidadeItensVendas; index++) {
+              vendaCriada =   await crud.registraVendaBubble(JSON.stringify(vendasExtraida[index]))
+              console.log('Venda Criada '+ JSON.stringify(vendaCriada).id);
+                
+            }
             // 
+
+
 
             // Envia registro para o Bubble
             resultadodopost = await enviaDadosBubble(jsonresult);

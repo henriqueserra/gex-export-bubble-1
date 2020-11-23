@@ -1,8 +1,18 @@
+const moment = require('moment');
+// const momenttz = require('moment-timezone');
+const ExportVisao = require('../models/model.exportavisao');
+const VendasBubble = require('../models/model.vendasbubble');
+const axios = require('axios');
+const { json } = require('body-parser');
+const biblioteca = require('../biblioteca');
+const crud = require('../crud');
+
+
+
 module.exports = app => {
-    app.get('/', (req, res) => res.send(`tudo ok !`));
-    app.post('/', (req, res) => {
-        res.status(200).json(req.body);
-        console.log(req.body);
+    app.get('/', async (req, res) => {  
+        res.json(globalVENDAVEIS);
     });
+
 
 };

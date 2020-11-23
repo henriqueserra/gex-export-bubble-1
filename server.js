@@ -12,3 +12,5 @@ global.globalVENDAVEIS=[];
 const connectDB = require('./config/database');
 connectDB();
 // ===============================================
+
+
