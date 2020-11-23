@@ -4,12 +4,14 @@ const ExportVisao = require('../models/model.exportavisao');
 const VendasBubble = require('../models/model.vendasbubble');
 const axios = require('axios');
 const { json } = require('body-parser');
+const biblioteca = require('../biblioteca');
 
 
 // Obtem os dados do MongoDb.
 // Faz uma busca pela data mais antiga da realização da venda e que possui o status processado = false
 async function  getDados (){
-    const dados = await ExportVisao.find({}).limit(1);    return (dados);
+    const dados = await ExportVisao.find({}).limit(1);    
+    return (dados[0]);
 
 
 }
@@ -21,26 +23,6 @@ function transformaEmJson(origem) {
 }
 // 
 
-function extraiDados(registro) {
-    let registroJson=[]
-    let registroTemporario={};
-    const quantidade = Object.keys(registro.produto).length;
-    console.log(registro);
-    for (let index = 0; index < quantidade; index++) {
-        registroTemporario={};
-        registroTemporario=({
-            "Nota_Fiscal": registro.nCFe,
-            "Preco_Unitario": registro.preco[index],
-            "Preco_Total": registro.valortotal,
-            "Produto": registro.produto[index],
-            "Quantidade": quantidade,
-            "Usuario": "1601238336708x931805447313282400"
-        })
-        registroJson.push(registroTemporario)
-
-    }
-    console.log(registroJson);
-}
 
 async function enviaDadosBubble(jsonresult) {
     return new Promise ((resolve, reject) =>{
@@ -72,46 +54,6 @@ async function updateMongoDb(idMongo) {
 // 
 
 
-async function enviaBubble (resltado) {
-    // return new Promise((resolve, reject)=>{
-    //     // Converte o resultado que é um objeto para JSON
-    //     var jsonresult = transformaEmJson(resultado)
-    //     // 
-    //     // Inicializa variável resultadodoposto
-    //     var resultadodopost;
-    //     // 
-    //     // Envia registro para o Bubble
-    //     const resultadodopost = await enviaDadosBubble(jsonresult);
-    //     // 
-    //     // Atualiza o registro no MongoDB 
-    //     const resultadoDoUpdate = await updateMongoDb(resultadodopost._id);
-    //     // 
-
-        // Anterior
-        // axios.post('https://gex-onboarding.bubbleapps.io/version-test/api/1.1/wf/vendas/', jsonresult)
-        //     .then(function (responseaxios) {
-        //         // console.log(responseaxios.data.response);
-        //         resultadodopost = responseaxios.data.response;
-        //         console.log('Dados gravados no Bubble');
-        //         }).then (()=>{
-        //             VendasBubble.updateOne({_id: resultadodopost._id},{processado: true}, {upsert: false}, (erroupdate, resultadoupdate)=>{
-        //                 if(erroupdate) {console.log ('erro'+ erroupdate)
-        //             reject (erroupdate)
-        //         };
-        //                 if(resultadoupdate){
-        //                     console.log('Dados atualizados no MongoDB')
-        //                     resolve(resultadodopost)
-
-        //                 };
-        //         })
-        //       })
-        //       .catch(error => {
-        //         console.error(error);
-        // })
-
-    // })
-}
-
 async function zeraStatusProcessado(){
      return new Promise ((resolve, reject)=>{
         VendasBubble.updateMany({},{$set : {processado : false}}, {upsert: false}).then((correto)=> resolve(correto)).catch((errado)=>reject(errado));
@@ -122,10 +64,14 @@ async function zeraStatusProcessado(){
 module.exports = app => {
     // ====================GET======================
     app.get('/atualiza', async (requisicao, resposta) => {
+        // Limpa a tela de console
         console.clear();
+        // await buscaEstabalecimentoBubble(golbalCNPJ);
+        await biblioteca.buscaEstabalecimentoBubble();
+        // Inicializa o parâmetro limit
         let limit = null;
         limit = requisicao.query.limit || 1
-        console.log('Limit '+limit);
+        // 
         var executados = [];
         var i=0;
         // Inicializa variável resultadodoposto
@@ -133,22 +79,36 @@ module.exports = app => {
         // 
 
         do {
-            const dados = await getDados();
-            // const dados2 = await enviaBubble(dados);
-            // Converte o resultado que é um objeto para JSON
-            var jsonresult = transformaEmJson(dados)
+            // Busca os dados no MongoDb
+            const jsonresult = await getDados();
             // 
+            
+            // Gera JSON para NotaFiscal
+            notaFiscalExtraida = biblioteca.extraiNotaFiscal(jsonresult);
+            // console.log('Nota Fiscal');
+            // console.log(notaFiscalExtraida);
+            // 
+
+            // Gera JSON para Vendas
+            vendasExtraida = await biblioteca.extraiVendas(jsonresult);
+            const quantidadeItensVendas = Object.keys(vendasExtraida).length;
+            console.log('Vendas');
+            console.log(vendasExtraida);
+            console.log(quantidadeItensVendas);
+            // 
+
             // Envia registro para o Bubble
-            var dadosExtraidos = extraiDados(jsonresult)
             resultadodopost = await enviaDadosBubble(jsonresult);
             // 
+            
             // Atualiza o registro no MongoDB 
             const resultadoDoUpdate = await updateMongoDb(resultadodopost._id);
             // 
             executados.push(resultadodopost._id)
             i=i+1;
         } while (i<limit);
-        resposta.status(200).json(executados) 
+        // resposta.status(200).json(executados) 
+        resposta.status(200).json(globalESTABELECIMENTO) 
     });
 
 

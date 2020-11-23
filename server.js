@@ -2,7 +2,8 @@ require('dotenv/config');
 
 // Declaração de variáveis globais
 global.golbalCNPJ = process.env.ESTABELECIMENTO_CNPJ;
-global.globalESTABELECIMENTO ='';
+global.globalUSUARIO = process.env.BUBBLE_USUARIO;
+global.globalESTABELECIMENTO ={};
 global.globalVENDAVEIS=[];
 
 
