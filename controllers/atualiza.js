@@ -8,19 +8,15 @@ const axios = require('axios');
 // Obtem os dados do MongoDb.
 // Faz uma busca pela data mais antiga da realização da venda e que possui o status processado = false
 async function  getDados (){
-    const dados = await ExportVisao.find({}).limit(1);
-    console.log('Dados Lidos');
-    return (dados);
+    const dados = await ExportVisao.find({}).limit(1);    return (dados);
 
 
 }
 // 
 // Transforma em Json o Array retornado pela função getDados()
 function transformaEmJson(origem) {
-    const origemStringify = JSON.stringify(origem);
-    const resultado = JSON.parse(origemStringify.substring(1, origemStringify.length-1));
-    console.log(resultado._id+' Convertido');
-    return resultado;
+    console.log(origem[0]._id+' Convertido');
+    return origem[0];
 }
 // 
 
@@ -105,11 +101,9 @@ module.exports = app => {
     // ====================GET======================
     app.get('/atualiza', async (requisicao, resposta) => {
         console.clear();
-        var limit = requisicao
-        .query.limit
-        if (limit === undefined) {
-            limit = 1
-        }
+        let limit = null;
+        limit = requisicao.query.limit || 1
+        console.log('Limit '+limit);
         var executados = [];
         var i=0;
         // Inicializa variável resultadodoposto
