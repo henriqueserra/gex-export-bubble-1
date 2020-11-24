@@ -42,7 +42,7 @@ async function extraiVendas(registro, idNotaFiscal) {
             "Estabelecimento" : globalESTABELECIMENTO.Estabelecimento,
             "Preco_Unitario": registro.preco[index],
             "Processado" : false,
-            "Produto": idVendavel,
+            "Produto": registro.produto[index],
             "Valor_Venda": registro.preco[index],
             "Quantidade": 1,
             "Nota_Fiscal": idNotaFiscal
@@ -57,9 +57,8 @@ async function trataVendavel (produto){
     id='';
     vendavel = globalVENDAVEIS.find(element => element.produto_text === produto)
     if (vendavel === undefined) {
-        console.log(produto+' novo vendavel');
-        id = await crud.criaVendavel(produto)
-        console.log(produto+' criado '+ id);
+        resultadoCriacaoVendavel = await crud.criaVendavel(produto)
+        console.log(produto+' criado '+ resultadoCriacaoVendavel.status);
         console.log('Carregando Vendaveis');
        await crud.buscaVendaveis();
        console.log('Vendaveis carregados');

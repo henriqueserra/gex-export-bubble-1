@@ -17,33 +17,12 @@ async function  getDados (){
 
 }
 // 
-// Transforma em Json o Array retornado pela função getDados()
-function transformaEmJson(origem) {
-
-    return origem[0];
-}
-// 
-
-
-async function enviaDadosBubble(jsonresult) {
-    return new Promise ((resolve, reject) =>{
-        axios.post('https://gex-onboarding.bubbleapps.io/version-test/api/1.1/wf/vendas/', jsonresult)
-        .then((respostaBubble)=>{
-            console.log('Registro '+respostaBubble.data.response._id+' gravado no Bubble');
-            resolve(respostaBubble.data.response)})
-        .catch((erroBubble)=>{
-            console.log('Erro de lançamento no Bubble');
-            reject(erroBubble)})
-    });
-    
-}
 
 // Atualiza Dados no MongoDB
 async function updateMongoDb(idMongo) {
     return new Promise ((resole, reject)=>{
     VendasBubble.updateOne({_id: idMongo},{processado : true},{upsert: false})
     .then ((respostaBubble)=>{
-        console.log(idMongo+' Atualizado no Mongo');
         resole(respostaBubble)
     }).catch((erroBubble)=>{
         console.log(idMongo+' Erro ao atualizar no Mongo');
@@ -65,10 +44,6 @@ async function zeraStatusProcessado(){
 module.exports = app => {
     // ====================GET======================
     app.get('/atualiza', async (requisicao, resposta) => {
-        // Limpa a tela de console
-        console.clear();
-        // await buscaEstabalecimentoBubble(golbalCNPJ);
-        await biblioteca.buscaEstabalecimentoBubble();
         // Inicializa o parâmetro limit
         let limit = null;
         limit = requisicao.query.limit || 1
@@ -83,41 +58,39 @@ module.exports = app => {
             // Busca os dados no MongoDb
             const jsonresult = await getDados();
             // 
-            
             // Gera JSON para NotaFiscal
             notaFiscalExtraida = biblioteca.extraiNotaFiscal(jsonresult);
             // 
             // Grava NotaFiscal no Bubbe=le
-            idNotaFiscal = await crud.registraNotaFiscalBubble(JSON.stringify(notaFiscalExtraida));
+            idNotaFiscal = await crud.registraNotaFiscalBubble(notaFiscalExtraida);
             // 
 
             // Gera JSON para Vendas
             vendasExtraida = await biblioteca.extraiVendas(jsonresult,idNotaFiscal);
             const quantidadeItensVendas = Object.keys(vendasExtraida).length;
-            console.log('Vendas');
-            console.log(vendasExtraida);
-            console.log(quantidadeItensVendas);
-            for (let index = 0; index < quantidadeItensVendas; index++) {
-              vendaCriada =   await crud.registraVendaBubble(JSON.stringify(vendasExtraida[index]))
-              console.log('Venda Criada '+ JSON.stringify(vendaCriada).id);
+            let index = 0
+            do {
+                // vendasExtraidaJson = JSON.stringify(vendasExtraida[index])
+                vendasExtraidaJson = vendasExtraida[index];
+                vendaCriada =   await crud.registraVendaBubble(vendasExtraidaJson);
+                console.log('Venda Criada '+ JSON.stringify(vendaCriada.status));
+
+                index++;
+            } while (index<quantidadeItensVendas);
+            // 
+            // Atualiza o registro no MongoDB 
+            const resultadoDoUpdate = await updateMongoDb(jsonresult._id);
+            if (resultadoDoUpdate.ok == 1) {
+                console.log('Update no MongoDB "success"');
+            } else {
                 
             }
             // 
-
-
-
-            // Envia registro para o Bubble
-            resultadodopost = await enviaDadosBubble(jsonresult);
-            // 
-            
-            // Atualiza o registro no MongoDB 
-            const resultadoDoUpdate = await updateMongoDb(resultadodopost._id);
-            // 
-            executados.push(resultadodopost._id)
+            executados.push(jsonresult)
             i=i+1;
         } while (i<limit);
         // resposta.status(200).json(executados) 
-        resposta.status(200).json(globalESTABELECIMENTO) 
+        resposta.status(200).json(executados) 
     });
 
 
