@@ -10,13 +10,34 @@ async function trataMeiodepagamento(registro){
     const quantidade = qtdMeiosdepagamento(registro);
     index = 0;
     do {
-        meiodepagamentoCadastrado(registro.meiopagamento[index])
+        const meioDePagamentoExiste = meiodepagamentoCadastrado(registro.meiopagamento[index]);
+        globalRESULTADOATUALIZA.push({"Variavel meioDePagamentoExiste? ": meioDePagamentoExiste});
+        if (!meioDePagamentoExiste) {
+            idMeiodepagamento = criaMeiodepagamento(registro.meiopagamento[index])
+        } 
         index ++;
     } while (index<quantidade);
 };
 // 
 // 
 // 
+
+async function criaMeiodepagamento (codigoMeiodepagamento){
+    return new Promise ((resolve, reject) =>{
+        novoMeiodepagamemto={
+            "Estabelecimento" : globalESTABELECIMENTO.Estabelecimento,
+            "CodMeiodepagamento" : codigoMeiodepagamento
+        };
+        axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/wf/postmeiodepagamento/', novoMeiodepagamemto)
+        .then((respostaBubble)=>{
+            globalRESULTADOATUALIZA.push({"Meio de pagamento criado ": respostaBubble.data});
+        resolve(respostaBubble.data)})
+        .catch((erroBubble)=>{
+            console.log('Erro de lançamento no Bubble');
+            reject(erroBubble)})
+    });
+
+};
 
 
 async function baixaMeiosdepagamento() {
