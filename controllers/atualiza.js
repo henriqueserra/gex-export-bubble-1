@@ -6,12 +6,16 @@ const axios = require('axios');
 const { json } = require('body-parser');
 const biblioteca = require('../biblioteca');
 const crud = require('../crud');
+const notafiscal = require('../bibliotecas/notafiscal.js');
+const meiodepagamento = require('../bibliotecas/meiodepagamento');
 
 
 // Obtem os dados do MongoDb.
 // Faz uma busca pela data mais antiga da realização da venda e que possui o status processado = false
 async function  getDados (){
     const dados = await ExportVisao.find({}).limit(1);    
+    globalRESULTADOATUALIZA.push({"dados obtidos": dados[0]});
+
     return (dados[0]);
 
 
@@ -44,9 +48,11 @@ async function zeraStatusProcessado(){
 module.exports = app => {
     // ====================GET======================
     app.get('/atualiza', async (requisicao, resposta) => {
+        globalRESULTADOATUALIZA=[];
         // Inicializa o parâmetro limit
         let limit = null;
         limit = requisicao.query.limit || 1
+        globalRESULTADOATUALIZA.push({"limit": limit});
         // 
         var executados = [];
         var i=0;
@@ -59,11 +65,16 @@ module.exports = app => {
             const jsonresult = await getDados();
             // 
             // Gera JSON para NotaFiscal
-            notaFiscalExtraida = biblioteca.extraiNotaFiscal(jsonresult);
+            notaFiscalExtraida = notafiscal.extraiNotaFiscal(jsonresult);
             // 
             // Grava NotaFiscal no Bubbe=le
-            idNotaFiscal = await crud.registraNotaFiscalBubble(notaFiscalExtraida);
+            idNotaFiscal = await notafiscal.registraNotaFiscalBubble(notaFiscalExtraida);
             // 
+            // **** Trata Meio de Pagamento
+            // 
+            meiodepagamento.trataMeiodepagamento(jsonresult);
+            // 
+            // ****
 
             // Gera JSON para Vendas
             vendasExtraida = await biblioteca.extraiVendas(jsonresult,idNotaFiscal);
@@ -90,7 +101,7 @@ module.exports = app => {
             i=i+1;
         } while (i<limit);
         // resposta.status(200).json(executados) 
-        resposta.status(200).json(executados) 
+        resposta.status(200).json(globalRESULTADOATUALIZA) 
     });
 
 

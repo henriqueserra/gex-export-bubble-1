@@ -1,5 +1,6 @@
 const crud = require('./crud');
 const biblioteca = require('./biblioteca');
+const meiodepagamento = require('./bibliotecas/meiodepagamento');
 
 
 async function  inicio() {
@@ -15,6 +16,10 @@ async function  inicio() {
     console.log('Carregando Vendaveis');
     vendaveis = await crud.buscaVendaveis();
     console.log('Vendaveis carregados');
+
+    console.log('Carregando Meios de Pagamento');
+    await meiodepagamento.baixaMeiosdepagamento();
+    console.log('Meios de pagamento carregados');
 
     
 };

@@ -14,21 +14,7 @@ async function buscaEstabalecimentoBubble() {
     }
 };
 
-function extraiNotaFiscal(registro) {
-    const quantidadeItens = Object.keys(registro.produto).length;
-    const NotaFiscalJson = {
-        "CPF Cliente": registro.destCPF,
-        "Data": registro.criado,
-        "Estabelecimento" : globalESTABELECIMENTO.Estabelecimento,
-        "Itens": quantidadeItens,
-        "Meio_Pagamento": registro.meiopagamento[0],
-        "NFe": registro.nCFe,
-        "Numero_Caixa": registro.numeroCaixa,
-        "Valor total" : registro.valortotal,
-        "Venda_Manual": false,
-    }
-    return (NotaFiscalJson);
-}
+
 
 async function extraiVendas(registro, idNotaFiscal) {
     let registroJson=[]
@@ -69,9 +55,10 @@ async function trataVendavel (produto){
     return (id);
 }
 
+
+
 module.exports = {
     buscaEstabalecimentoBubble : buscaEstabalecimentoBubble,
-    extraiNotaFiscal : extraiNotaFiscal,
     extraiVendas : extraiVendas,
     trataVendavel : trataVendavel,
 }
