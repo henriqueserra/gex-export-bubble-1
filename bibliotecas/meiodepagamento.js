@@ -12,7 +12,7 @@ async function trataMeiodepagamento(registro){
     do {
         const meioDePagamentoExiste = meiodepagamentoCadastrado(registro.meiopagamento[index]);
         globalRESULTADOATUALIZA.push({"Variavel meioDePagamentoExiste? ": meioDePagamentoExiste});
-        if (!meioDePagamentoExiste) {
+        if (meioDePagamentoExiste === null) {
             idMeiodepagamento = criaMeiodepagamento(registro.meiopagamento[index])
         } 
         index ++;
@@ -30,6 +30,8 @@ async function criaMeiodepagamento (codigoMeiodepagamento){
         };
         axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/wf/postmeiodepagamento/', novoMeiodepagamemto)
         .then((respostaBubble)=>{
+            baixaMeiosdepagamento();
+            globalRESULTADOATUALIZA.push({"JSON enviado para criação de meio de pagamento ": novoMeiodepagamemto});
             globalRESULTADOATUALIZA.push({"Meio de pagamento criado ": respostaBubble.data});
         resolve(respostaBubble.data)})
         .catch((erroBubble)=>{
@@ -45,6 +47,7 @@ async function baixaMeiosdepagamento() {
         axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/wf/getmeiosdepagamento/', globalESTABELECIMENTO)
         .then((respostaBubble)=>{
         globalMEIOSDEPAGAMENTO = respostaBubble.data.response.Meiosdepagamento
+        globalRESULTADOATUALIZA.push({"Meios de pagamento no Bubble ": globalMEIOSDEPAGAMENTO});
         resolve(respostaBubble.data)})
         .catch((erroBubble)=>{
             console.log('Erro de lançamento no Bubble');
