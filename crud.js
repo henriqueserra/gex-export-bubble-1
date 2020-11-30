@@ -3,8 +3,10 @@ const axios = require('axios');
 
 async function registraVendaBubble(jsonVenda) {
     return new Promise ((resolve, reject) =>{
+        globalRESULTADOATUALIZA.push({"Venda enviada ao Bubble  ": jsonVenda});
         axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/wf/postvenda/', jsonVenda)
         .then((respostaBubble)=>{
+            globalRESULTADOATUALIZA.push({"Resposta da criação de nova Venda  ": respostaBubble.data});
             resolve(respostaBubble.data)})
         .catch((erroBubble)=>{
             console.log('Erro de lançamento no Bubble');

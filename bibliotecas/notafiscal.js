@@ -6,9 +6,12 @@ const vendavel = require('./vendavel');
 
 function extraiNotaFiscal(registro) {
     const quantidadeItens = vendavel.qtdVendaveis(registro);
+    data = new Date(registro.criado);
+    data.setHours(data.getHours()-3);
+    console.log('Data -> '+ data);
     const NotaFiscalJson = {
         "CPF Cliente": registro.destCPF,
-        "Data": registro.criado,
+        "Data": data,
         "Estabelecimento" : globalESTABELECIMENTO.Estabelecimento,
         "Itens": quantidadeItens,
         "Meio_Pagamento": registro.meiopagamento[0],
@@ -27,6 +30,7 @@ async function registraNotaFiscalBubble(jsonNotaFiscal) {
         axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/wf/postnotafiscal/', jsonNotaFiscal)
         .then((respostaBubble)=>{
             globalRESULTADOATUALIZA.push({"Resposta do POSTNOTAFISCAL": respostaBubble.data});
+            globalIDNOTAFISCAL = respostaBubble.data.response.NotaFiscal;
             resolve(respostaBubble.data.response.NotaFiscal)})
         .catch((erroBubble)=>{
             console.log('Erro de lançamento no Bubble');

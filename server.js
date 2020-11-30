@@ -7,6 +7,7 @@ global.globalESTABELECIMENTO ={};
 global.globalVENDAVEIS=[];
 global.globalMEIOSDEPAGAMENTO=[];
 global.globalRESULTADOATUALIZA=[];
+global.globalIDNOTAFISCAL='';
 
 
 // ===============================================

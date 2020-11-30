@@ -78,6 +78,7 @@ module.exports = app => {
 
             // Gera JSON para Vendas
             vendasExtraida = await biblioteca.extraiVendas(jsonresult,idNotaFiscal);
+            globalRESULTADOATUALIZA.push({"Vendas extraídas JSON ": vendasExtraida});
             const quantidadeItensVendas = Object.keys(vendasExtraida).length;
             let index = 0
             do {

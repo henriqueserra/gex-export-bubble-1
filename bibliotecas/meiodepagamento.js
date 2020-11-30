@@ -13,14 +13,47 @@ async function trataMeiodepagamento(registro){
         const meioDePagamentoExiste = meiodepagamentoCadastrado(registro.meiopagamento[index]);
         globalRESULTADOATUALIZA.push({"Variavel meioDePagamentoExiste? ": meioDePagamentoExiste});
         if (meioDePagamentoExiste === null) {
-            idMeiodepagamento = criaMeiodepagamento(registro.meiopagamento[index])
-        } 
+            respostaCriacaoMeiodepagamento = await criaMeiodepagamento(registro.meiopagamento[index])
+            globalRESULTADOATUALIZA.push({"id do novo meio de pagamento ": respostaCriacaoMeiodepagamento.response.meiodepagamento._id});
+            idMeiodepagamento = respostaCriacaoMeiodepagamento.response.meiodepagamento._id
+        } else {
+            idMeiodepagamento =  meioDePagamentoExiste
+        };
+        idPagamento = await  criaPagamento(idMeiodepagamento,registro.valormeiopagamento[index])
         index ++;
     } while (index<quantidade);
 };
 // 
 // 
 // 
+
+// Cria Pagamento
+async function criaPagamento (idMeiodepagamento, valor){
+    return new Promise ((resolve, reject) =>{
+        novoPagamemto={
+            "Estabelecimento" : globalESTABELECIMENTO.Estabelecimento,
+            "NotaFiscal" : globalIDNOTAFISCAL,
+            "idMeiodepagamento" : idMeiodepagamento,
+            "valor" : valor
+        };
+        axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/wf/postpagamento/', novoPagamemto)
+        .then((respostaBubble)=>{
+            baixaMeiosdepagamento();
+            globalRESULTADOATUALIZA.push({"JSON enviado para criação de Pagamento ": novoPagamemto});
+            globalRESULTADOATUALIZA.push({"Pagamento criado ": respostaBubble.data});
+        resolve(respostaBubble.data.response.Pagamento)})
+        .catch((erroBubble)=>{
+            console.log('Erro de lançamento no Bubble');
+            reject(erroBubble)})
+    });
+
+};
+// 
+// 
+
+
+
+
 
 async function criaMeiodepagamento (codigoMeiodepagamento){
     return new Promise ((resolve, reject) =>{
