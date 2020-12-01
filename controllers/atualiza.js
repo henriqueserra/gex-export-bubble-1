@@ -14,8 +14,8 @@ const { now } = require('moment');
 // Obtem os dados do MongoDb.
 // Faz uma busca pela data mais antiga da realização da venda e que possui o status processado = false
 async function  getDados (limit){
-    const dados = await ExportVisao.find({}).limit(limit);    
-    globalRESULTADOATUALIZA.push({"dados obtidos": dados});
+    const dados = await ExportVisao.find({}).limit(limit).sort('criado', -1);    
+    // globalRESULTADOATUALIZA.push({"dados obtidos": dados});
 
     return (dados);
 

@@ -21,6 +21,7 @@ async function buscaVendaveis() {
         axios.post(rota,estabelecimento)
         .then((resposta)=>{
             globalVENDAVEIS = resposta.data.response.Vendavel;
+            globalRESULTADOATUALIZA.push({"Vendaveis no Bubble": resposta.data});
             resolve(resposta.data.response.Vendavel)})
         .catch((erro)=>{reject(erro)})
     });
