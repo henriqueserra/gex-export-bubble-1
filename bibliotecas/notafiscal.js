@@ -8,7 +8,6 @@ function extraiNotaFiscal(registro) {
     const quantidadeItens = vendavel.qtdVendaveis(registro);
     data = new Date(registro.criado);
     data.setHours(data.getHours()-3);
-    console.log('Data -> '+ data);
     const NotaFiscalJson = {
         "CPF Cliente": registro.destCPF,
         "Data": data,

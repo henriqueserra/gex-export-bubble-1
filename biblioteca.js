@@ -20,7 +20,6 @@ async function extraiVendas(registro, idNotaFiscal) {
     let registroJson=[]
     let registroTemporario={};
     const quantidade = Object.keys(registro.produto).length;
-    // console.log(registro);
     for (let index = 0; index < quantidade; index++) {
         registroTemporario={};
         idVendavel = await trataVendavel(registro.produto[index])

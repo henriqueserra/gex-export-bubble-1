@@ -91,7 +91,6 @@ async function baixaMeiosdepagamento() {
 function qtdMeiosdepagamento(registro){
     const qtd = Object.keys(registro.meiopagamento).length;
     globalRESULTADOATUALIZA.push({"Quantidade de Meios de Pagamento na Nota Fiscal": qtd});
-    console.log('Quantidade de Meios de Pagamento na Nota Fiscal ',qtd);
     return(qtd);
 };
 

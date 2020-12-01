@@ -18,15 +18,9 @@ async function buscaVendaveis() {
     return new Promise((resolve, reject)=>{
         estabelecimento = globalESTABELECIMENTO;
         const rota = process.env.API_GEX+process.env.API_VENDAVEIS
-        // console.log(estabelecimento);
-        // console.log(rota);
         axios.post(rota,estabelecimento)
         .then((resposta)=>{
-            // console.log(resposta.data.response);
             globalVENDAVEIS = resposta.data.response.Vendavel;
-            globalVENDAVEIS.forEach(element => {
-                console.log(element.produto_text)
-            });
             resolve(resposta.data.response.Vendavel)})
         .catch((erro)=>{reject(erro)})
     });
@@ -40,8 +34,6 @@ async function criaVendavel(produto) {
         }
         axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/wf/postvendavel/', novoVendavel)
         .then((respostaBubble)=>{
-            console.log(novoVendavel);
-            console.log(respostaBubble.data);
             resolve(respostaBubble.data)})
         .catch((erroBubble)=>{
             console.log(erroBuble);
@@ -58,8 +50,6 @@ async function criaMeiodepagamento(meiodepagamento) {
         }
         axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/wf/postmeiodepagamento/', novoMeiodepagamento)
         .then((respostaBubble)=>{
-            console.log(novoMeiodepagamento);
-            console.log(respostaBubble.data);
             resolve(respostaBubble.data)})
         .catch((erroBubble)=>{
             console.log(erroBuble);

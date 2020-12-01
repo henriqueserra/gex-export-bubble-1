@@ -10,6 +10,8 @@ async function  inicio() {
     // Carrega Estabelecimento
     console.log('Carregando Estabelecimento');
     await biblioteca.buscaEstabalecimentoBubble()
+    console.log('Estabelecimentos carregados');
+
     // 
 
     // Carrega tabela de Vendáveis

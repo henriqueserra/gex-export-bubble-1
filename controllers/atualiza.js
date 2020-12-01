@@ -13,11 +13,11 @@ const { now } = require('moment');
 
 // Obtem os dados do MongoDb.
 // Faz uma busca pela data mais antiga da realização da venda e que possui o status processado = false
-async function  getDados (){
-    const dados = await ExportVisao.find({}).limit(1);    
-    globalRESULTADOATUALIZA.push({"dados obtidos": dados[0]});
+async function  getDados (limit){
+    const dados = await ExportVisao.find({}).limit(limit);    
+    globalRESULTADOATUALIZA.push({"dados obtidos": dados});
 
-    return (dados[0]);
+    return (dados);
 
 
 }
@@ -54,6 +54,7 @@ module.exports = app => {
         // Inicializa o parâmetro limit
         let limit = null;
         limit = requisicao.query.limit || 1
+        limit = parseInt(limit);
         globalRESULTADOATUALIZA.push({"limit": limit});
         // 
         var executados = [];
@@ -61,25 +62,25 @@ module.exports = app => {
         // Inicializa variável resultadodoposto
         var resultadodopost;
         // 
+        // Busca os dados no MongoDb
+        const jsonresult = await getDados(limit);
 
         do {
-            // Busca os dados no MongoDb
-            const jsonresult = await getDados();
             // 
             // Gera JSON para NotaFiscal
-            notaFiscalExtraida = notafiscal.extraiNotaFiscal(jsonresult);
+            notaFiscalExtraida = notafiscal.extraiNotaFiscal(jsonresult[i]);
             // 
             // Grava NotaFiscal no Bubbe=le
             idNotaFiscal = await notafiscal.registraNotaFiscalBubble(notaFiscalExtraida);
             // 
             // **** Trata Meio de Pagamento
             // 
-            meiodepagamento.trataMeiodepagamento(jsonresult);
+            meiodepagamento.trataMeiodepagamento(jsonresult[i]);
             // 
             // ****
 
             // Gera JSON para Vendas
-            vendasExtraida = await biblioteca.extraiVendas(jsonresult,idNotaFiscal);
+            vendasExtraida = await biblioteca.extraiVendas(jsonresult[i],idNotaFiscal);
             globalRESULTADOATUALIZA.push({"Vendas extraídas JSON ": vendasExtraida});
             const quantidadeItensVendas = Object.keys(vendasExtraida).length;
             let index = 0
@@ -87,21 +88,22 @@ module.exports = app => {
                 // vendasExtraidaJson = JSON.stringify(vendasExtraida[index])
                 vendasExtraidaJson = vendasExtraida[index];
                 vendaCriada =   await crud.registraVendaBubble(vendasExtraidaJson);
-                console.log('Venda Criada '+ JSON.stringify(vendaCriada.status));
+                // console.log('Venda Criada '+ JSON.stringify(vendaCriada.status));
 
                 index++;
             } while (index<quantidadeItensVendas);
             // 
             // Atualiza o registro no MongoDB 
-            const resultadoDoUpdate = await updateMongoDb(jsonresult._id);
+            const resultadoDoUpdate = await updateMongoDb(jsonresult[i]._id);
             if (resultadoDoUpdate.ok == 1) {
                 console.log('Update no MongoDB "success"');
             } else {
                 
             }
             // 
-            executados.push(jsonresult)
+            executados.push(jsonresult[i])
             i=i+1;
+            console.log('Faltam '+ (limit-i)+' registros a serem processados');
         } while (i<limit);
         // resposta.status(200).json(executados) 
         globalFINAL = now();
@@ -115,9 +117,10 @@ module.exports = app => {
 
     app.get('/apaga', async (req, res) => {
         const resultado = await zeraStatusProcessado();
-        console.log(resultado)
         var mensagemfinal = {'Total de registros': resultado.n,
         'Registros modificados': resultado.nModified}
+        console.clear();
+        console.log(mensagemfinal)
         res.send(mensagemfinal)
 
     });
