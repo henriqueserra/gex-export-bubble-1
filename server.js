@@ -8,6 +8,8 @@ global.globalVENDAVEIS=[];
 global.globalMEIOSDEPAGAMENTO=[];
 global.globalRESULTADOATUALIZA=[];
 global.globalIDNOTAFISCAL='';
+global.globalINICIO = null;
+global.globalFINAL = null;
 
 
 // ===============================================

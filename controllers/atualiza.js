@@ -8,6 +8,7 @@ const biblioteca = require('../biblioteca');
 const crud = require('../crud');
 const notafiscal = require('../bibliotecas/notafiscal.js');
 const meiodepagamento = require('../bibliotecas/meiodepagamento');
+const { now } = require('moment');
 
 
 // Obtem os dados do MongoDb.
@@ -49,6 +50,7 @@ module.exports = app => {
     // ====================GET======================
     app.get('/atualiza', async (requisicao, resposta) => {
         globalRESULTADOATUALIZA=[];
+        globalINICIO=now();
         // Inicializa o parâmetro limit
         let limit = null;
         limit = requisicao.query.limit || 1
@@ -102,6 +104,11 @@ module.exports = app => {
             i=i+1;
         } while (i<limit);
         // resposta.status(200).json(executados) 
+        globalFINAL = now();
+        globalRESULTADOATUALIZA.unshift({"Inicio de Processamento ": globalINICIO});
+        globalRESULTADOATUALIZA.unshift({"Final de Processamento ": globalFINAL});
+        globalRESULTADOATUALIZA.unshift({"Tempo total de Processamento ": (globalFINAL-globalINICIO)/1000});
+        globalRESULTADOATUALIZA.unshift({"Tempo total de Processamento por registro  ": (globalFINAL-globalINICIO)/1000/limit});
         resposta.status(200).json(globalRESULTADOATUALIZA) 
     });
 
