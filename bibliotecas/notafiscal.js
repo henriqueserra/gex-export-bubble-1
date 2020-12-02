@@ -13,7 +13,6 @@ function extraiNotaFiscal(registro) {
         "Data": data,
         "Estabelecimento" : globalESTABELECIMENTO.Estabelecimento,
         "Itens": quantidadeItens,
-        "Meio_Pagamento": registro.meiopagamento[0],
         "NFe": registro.nCFe,
         "Numero_Caixa": registro.numeroCaixa,
         "Valor total" : registro.valortotal,

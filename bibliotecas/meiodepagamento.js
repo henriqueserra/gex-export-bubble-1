@@ -11,7 +11,7 @@ async function trataMeiodepagamento(registro){
     index = 0;
     do {
         const meioDePagamentoExiste = meiodepagamentoCadastrado(registro.meiopagamento[index]);
-        globalRESULTADOATUALIZA.push({"Variavel meioDePagamentoExiste? ": meioDePagamentoExiste});
+        // globalRESULTADOATUALIZA.push({"Variavel meioDePagamentoExiste? ": meioDePagamentoExiste});
         if (meioDePagamentoExiste === null) {
             respostaCriacaoMeiodepagamento = await criaMeiodepagamento(registro.meiopagamento[index])
             globalRESULTADOATUALIZA.push({"id do novo meio de pagamento ": respostaCriacaoMeiodepagamento.response.meiodepagamento._id});
@@ -38,7 +38,7 @@ async function criaPagamento (idMeiodepagamento, valor){
         };
         axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/wf/postpagamento/', novoPagamemto)
         .then((respostaBubble)=>{
-            baixaMeiosdepagamento();
+            // baixaMeiosdepagamento();
             globalRESULTADOATUALIZA.push({"JSON enviado para criação de Pagamento ": novoPagamemto});
             globalRESULTADOATUALIZA.push({"Pagamento criado ": respostaBubble.data});
         resolve(respostaBubble.data.response.Pagamento)})
@@ -80,7 +80,7 @@ async function baixaMeiosdepagamento() {
         axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/wf/getmeiosdepagamento/', globalESTABELECIMENTO)
         .then((respostaBubble)=>{
         globalMEIOSDEPAGAMENTO = respostaBubble.data.response.Meiosdepagamento
-        globalRESULTADOATUALIZA.push({"Meios de pagamento no Bubble ": globalMEIOSDEPAGAMENTO});
+        // globalRESULTADOATUALIZA.push({"Meios de pagamento no Bubble ": globalMEIOSDEPAGAMENTO});
         resolve(respostaBubble.data)})
         .catch((erroBubble)=>{
             console.log('Erro de lançamento no Bubble');
@@ -97,12 +97,12 @@ function qtdMeiosdepagamento(registro){
 function meiodepagamentoCadastrado(codigo){
     localizado = globalMEIOSDEPAGAMENTO.find(element => element.codigo_text === codigo)
     if (localizado === undefined) {
-        globalRESULTADOATUALIZA.push({"Meio de pagamento consultado":codigo});
-        globalRESULTADOATUALIZA.push({"Meio de pagamento cadastrado":false});
+        // globalRESULTADOATUALIZA.push({"Meio de pagamento consultado":codigo});
+        // globalRESULTADOATUALIZA.push({"Meio de pagamento cadastrado":false});
         return(null)
     } else {
-        globalRESULTADOATUALIZA.push({"Meio de pagamento cadastrado":true});
-        globalRESULTADOATUALIZA.push({"Meio de pagamento":localizado});
+        // globalRESULTADOATUALIZA.push({"Meio de pagamento cadastrado":true});
+        // globalRESULTADOATUALIZA.push({"Meio de pagamento":localizado});
         return(localizado._id);
     }
 };
