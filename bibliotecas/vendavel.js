@@ -30,9 +30,8 @@ async function trataVendaveis(registro){
         if (!vendavelExiste(teste.produto[index])) {
 
             const promise1 = await criaVendavel(teste.produto[index], codigo.toString());
-            const promise2 = await buscaVendaveis();
 
-            Promise.all([promise1, promise2]).then((valores) => { console.log(valores);});
+            Promise.all([promise1]);
             
             
         } 
@@ -68,22 +67,22 @@ async function buscaVendaveis() {
 }
 
 async function criaVendavel(produto,codigo) {
-    return new Promise ((resolve, reject) =>{
-        const novoVendavel = {
-            "produto": produto,
-            "estabelecimento": globalESTABELECIMENTO.Estabelecimento,
-            "codigo": codigo
-        }
-        axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/wf/postvendavel/', novoVendavel)
-        .then((respostaBubble)=>{
-            globalRESULTADOATUALIZA.push({ "Vendavel Criado ": respostaBubble.data });
-            diversos.loga('Vendavel novo criado')
-            resolve(respostaBubble.data)})
-        .catch((erroBubble)=>{
-            console.log(erroBubble);
-            console.log('Não foi possivel criar o produto');
-            reject(erroBubble)})
+    const novoVendavel = {
+        "produto": produto,
+        "estabelecimento": globalESTABELECIMENTO.Estabelecimento,
+        "codigo": codigo
+    };
+
+    const promise1 = await axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/wf/postvendavel/', novoVendavel);
+    const promise2 = await buscaVendaveis();
+
+    Promise.all([promise1, promise2]).then((valores) => { 
+        globalRESULTADOATUALIZA.push({ "Vendavel Criado ": valores[0].data });
+        diversos.loga('Vendavel novo criado => '+ produto)
+
     });
+
+
 }
 
 

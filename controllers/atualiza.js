@@ -95,7 +95,6 @@ module.exports = app => {
             const promise1 = await meiodepagamento.trataMeiodepagamento(registro);
             // 
             // **** Trata Vendaveis
-            globalRESULTADOATUALIZA.push({"jsonresult ": registro});
             const promise2 = await vendavel.trataVendaveis(registro)
 
             Promise.all([notaFiscalExtraida, idNotaFiscal, promise1, promise2]);
