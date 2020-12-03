@@ -27,6 +27,7 @@
     "express": "^4.17.1",
     "moment": "^2.29.1",
     "mongoose": "^5.10.13",
-    "mongoose-timezone": "^1.3.0"
+    "mongoose-timezone": "^1.3.0",
+    "prettier": "^2.2.1"
   }
 }

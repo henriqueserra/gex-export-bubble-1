@@ -2,26 +2,28 @@ const axios = require('axios');
 const crud = require('../crud.js');
 const vendavel = require('./vendavel');
 const notafiscal = require('./notafiscal');
+const diersos = require('./diversos');
+const diversos = require('./diversos');
 
 // 
 // 
 // 
-async function trataMeiodepagamento(registro){
+async function trataMeiodepagamento(registro) {
     const quantidade = qtdMeiosdepagamento(registro);
     index = 0;
     do {
         const meioDePagamentoExiste = meiodepagamentoCadastrado(registro.meiopagamento[index]);
-        // globalRESULTADOATUALIZA.push({"Variavel meioDePagamentoExiste? ": meioDePagamentoExiste});
         if (meioDePagamentoExiste === null) {
-            respostaCriacaoMeiodepagamento = await criaMeiodepagamento(registro.meiopagamento[index])
-            globalRESULTADOATUALIZA.push({"id do novo meio de pagamento ": respostaCriacaoMeiodepagamento.response.meiodepagamento._id});
-            idMeiodepagamento = respostaCriacaoMeiodepagamento.response.meiodepagamento._id
-        } else {
-            idMeiodepagamento =  meioDePagamentoExiste
-        };
-        idPagamento = await  criaPagamento(idMeiodepagamento,registro.valormeiopagamento[index])
+            diversos.loga('criando meio de pagamento');
+            respostaCriacaoMeiodepagamento = await criaMeiodepagamento(registro.meiopagamento[index]);
+            Promise.all([respostaCriacaoMeiodepagamento]);
+            diversos.loga('criado meio de pagamento');
+        } 
+        idMeiodepagamento = meiodepagamentoCadastrado(registro.meiopagamento[index]);   
+        idPagamento = await criaPagamento(idMeiodepagamento, registro.valormeiopagamento[index])
         index ++;
-    } while (index<quantidade);
+    } while (index < quantidade);
+    return ('ok');
 };
 // 
 // 
@@ -37,11 +39,10 @@ async function criaPagamento (idMeiodepagamento, valor){
             "valor" : valor
         };
         axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/wf/postpagamento/', novoPagamemto)
-        .then((respostaBubble)=>{
+        .then((resposta)=>{
             // baixaMeiosdepagamento();
-            globalRESULTADOATUALIZA.push({"JSON enviado para criação de Pagamento ": novoPagamemto});
-            globalRESULTADOATUALIZA.push({"Pagamento criado ": respostaBubble.data});
-        resolve(respostaBubble.data.response.Pagamento)})
+            globalRESULTADOATUALIZA.push({"Pagamento criado ": resposta.data});
+        resolve(resposta.data.response.Pagamento)})
         .catch((erroBubble)=>{
             console.log('Erro de lançamento no Bubble');
             reject(erroBubble)})
@@ -62,11 +63,11 @@ async function criaMeiodepagamento (codigoMeiodepagamento){
             "CodMeiodepagamento" : codigoMeiodepagamento
         };
         axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/wf/postmeiodepagamento/', novoMeiodepagamemto)
-        .then((respostaBubble)=>{
+            .then((resposta) => {
+                diversos.loga('Meio de Pagamento Criado');
             baixaMeiosdepagamento();
-            globalRESULTADOATUALIZA.push({"JSON enviado para criação de meio de pagamento ": novoMeiodepagamemto});
-            globalRESULTADOATUALIZA.push({"Meio de pagamento criado ": respostaBubble.data});
-        resolve(respostaBubble.data)})
+            globalRESULTADOATUALIZA.push({"Meio de pagamento criado ": resposta.data});
+        resolve(resposta.data)})
         .catch((erroBubble)=>{
             console.log('Erro de lançamento no Bubble');
             reject(erroBubble)})
@@ -78,10 +79,10 @@ async function criaMeiodepagamento (codigoMeiodepagamento){
 async function baixaMeiosdepagamento() {
     return new Promise ((resolve, reject) =>{
         axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/wf/getmeiosdepagamento/', globalESTABELECIMENTO)
-        .then((respostaBubble)=>{
-        globalMEIOSDEPAGAMENTO = respostaBubble.data.response.Meiosdepagamento
-        // globalRESULTADOATUALIZA.push({"Meios de pagamento no Bubble ": globalMEIOSDEPAGAMENTO});
-        resolve(respostaBubble.data)})
+        .then((resposta)=>{
+            globalMEIOSDEPAGAMENTO = resposta.data.response.Meiosdepagamento;
+            diersos.loga('Meios de Pagamento carregados => '+ Object.keys(resposta.data.response.Meiosdepagamento).length);
+        resolve(resposta.data)})
         .catch((erroBubble)=>{
             console.log('Erro de lançamento no Bubble');
             reject(erroBubble)})
@@ -90,7 +91,6 @@ async function baixaMeiosdepagamento() {
 
 function qtdMeiosdepagamento(registro){
     const qtd = Object.keys(registro.meiopagamento).length;
-    globalRESULTADOATUALIZA.push({"Quantidade de Meios de Pagamento na Nota Fiscal": qtd});
     return(qtd);
 };
 

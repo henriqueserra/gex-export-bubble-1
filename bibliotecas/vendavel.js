@@ -1,9 +1,9 @@
 const axios = require('axios');
+const diversos = require('./diversos');
 
 
 function qtdVendaveis(registro) {
     const qtd = Object.keys(registro.produto).length;
-    globalRESULTADOATUALIZA.push({'Quantidade de Vendáveis na Nota Fiscal' : qtd})
     return(qtd);
 }
 function vendavelExiste(produto){
@@ -25,24 +25,19 @@ async function trataVendaveis(registro){
         } else {
             var codigo = teste.codigoproduto[index]
         }
-        console.log('Produto -> '+ teste.produto[index] + ' index '+index);
+
+        
         if (!vendavelExiste(teste.produto[index])) {
 
-            await criaVendavel(teste.produto[index], codigo.toString()).then(
-                await buscaVendaveis()
-            )
+            const promise1 = await criaVendavel(teste.produto[index], codigo.toString());
+            const promise2 = await buscaVendaveis();
+
+            Promise.all([promise1, promise2]).then((valores) => { console.log(valores);});
             
-        } else {
-            console.log(teste.produto[index]);
-            console.log(vendavelExiste(teste.produto[index]));
-        }
-        produto = teste.produto[index];
-        idProduto = await idVendavel(teste.produto[index])
-        // console.log('Produto '+ produto+ ' ID '+ idProduto._id);
-
-
-        globalRESULTADOATUALIZA.push({'Produto ' : teste.produto[index]})
-        globalRESULTADOATUALIZA.push({'id ' : idProduto.produto_text})
+            
+        } 
+        idProduto = await idVendavel(teste.produto[index]);
+        console.log('id de ' + teste.produto[index] + ' => ' + idProduto);
         index++;
     } while (index<qtdVendaveis(teste));
 
@@ -50,12 +45,10 @@ async function trataVendaveis(registro){
 
 async function idVendavel(produto){
     return new Promise((resolve, reject)=>{
-      let existe = globalVENDAVEIS.find(element => element.produto_text === produto)
-      existeStringfy=JSON.stringify(existe);
-      globalRESULTADOATUALIZA.push({'idVendavel' : existe});
-      globalRESULTADOATUALIZA.push({'GlobalVendaveis' : globalVENDAVEIS})
-      console.log('ID Vendavel '+existe);
-      resolve(existe)
+        const existe = globalVENDAVEIS.find(element => element.produto_text === produto);
+        const idProduto = JSON.parse(JSON.stringify(existe));
+
+        resolve(idProduto._id)
     });
 
 };
@@ -66,9 +59,10 @@ async function buscaVendaveis() {
         const rota = process.env.API_GEX+process.env.API_VENDAVEIS
         axios.post(rota,estabelecimento)
         .then((resposta)=>{
-            console.log('Typeof de BuscaVendaveis '+ typeof resposta);
             globalVENDAVEIS = resposta.data.response.Vendavel;
-            resolve(resposta.data.response.Vendavel)})
+            diversos.loga('Vendaveis carregados => ' + Object.keys(resposta.data.response.Vendavel).length);
+            resolve(resposta.data.response.Vendavel);
+        })
         .catch((erro)=>{reject(erro)})
     });
 }
@@ -82,8 +76,8 @@ async function criaVendavel(produto,codigo) {
         }
         axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/wf/postvendavel/', novoVendavel)
         .then((respostaBubble)=>{
-            globalRESULTADOATUALIZA.push({"JSON Criação de produto ": novoVendavel});
-            globalRESULTADOATUALIZA.push({"Produto Criado ": respostaBubble.data});
+            globalRESULTADOATUALIZA.push({ "Vendavel Criado ": respostaBubble.data });
+            diversos.loga('Vendavel novo criado')
             resolve(respostaBubble.data)})
         .catch((erroBubble)=>{
             console.log(erroBubble);

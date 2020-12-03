@@ -1,5 +1,4 @@
 const moment = require('moment');
-// const momenttz = require('moment-timezone');
 const ExportVisao = require('../models/model.exportavisao');
 const VendasBubble = require('../models/model.vendasbubble');
 const axios = require('axios');
@@ -12,6 +11,8 @@ const vendas = require('../bibliotecas/vendas');
 const bubble = require('../bibliotecas/bubble');
 const vendavel = require('../bibliotecas/vendavel');
 const biblioteca = require('../biblioteca.js');
+const diversos = require('../bibliotecas/diversos');
+const main = require('../main.js');
 
 
 // Obtem os dados do MongoDb.
@@ -46,7 +47,10 @@ async function updateMongoDb(idMongo) {
 
 async function zeraStatusProcessado(){
      return new Promise ((resolve, reject)=>{
-        VendasBubble.updateMany({},{$set : {processado : false}}, {upsert: false}).then((correto)=> resolve(correto)).catch((errado)=>reject(errado));
+         VendasBubble.updateMany({}, { $set: { processado: false } }, { upsert: false }).then((correto) => {
+             diversos.loga('Registros MongoDB resetados');
+             resolve(correto);
+         }).catch((errado) => reject(errado));
      })
 }
 
@@ -54,15 +58,18 @@ async function zeraStatusProcessado(){
 module.exports = app => {
     // ====================GET======================
     app.get('/atualiza', async (requisicao, resposta) => {
-        console.clear();
+        main.inicio();
+
         globalRESULTADOATUALIZA=[];
         // Inicializa o parâmetro limit
         let limit = null;
         limit = requisicao.query.limit || 1
         limit = parseInt(limit);
-        if (requisicao.query.apaga = "true") {
-            await bubble.apagaBubble();
-            await zeraStatusProcessado();
+        if (requisicao.query.apaga === "true") {
+            const promise1 = await bubble.apagaBubble();
+            const promise2 = await zeraStatusProcessado();
+
+            Promise.all([promise1, promise2]).then((valores)=>{console.log(valores);});
         }
         // 
         globalINICIO=now();
@@ -78,19 +85,21 @@ module.exports = app => {
             const registro = JSON.parse(JSON.stringify(jsonresult[i]));
             // 
             // Gera JSON para NotaFiscal
-            notaFiscalExtraida = notafiscal.extraiNotaFiscal(registro);
+            const notaFiscalExtraida = await notafiscal.extraiNotaFiscal(registro);
             // 
             // Grava NotaFiscal no Bubbe=le
-            idNotaFiscal = await notafiscal.registraNotaFiscalBubble(notaFiscalExtraida);
+            const idNotaFiscal = await notafiscal.registraNotaFiscalBubble(notaFiscalExtraida);
             // 
             // **** Trata Meio de Pagamento
             // 
-            meiodepagamento.trataMeiodepagamento(registro);
+            const promise1 = await meiodepagamento.trataMeiodepagamento(registro);
             // 
             // **** Trata Vendaveis
             globalRESULTADOATUALIZA.push({"jsonresult ": registro});
-            await vendavel.trataVendaveis(registro)
+            const promise2 = await vendavel.trataVendaveis(registro)
 
+            Promise.all([notaFiscalExtraida, idNotaFiscal, promise1, promise2]);
+            
             // 
 
             // Gera JSON para Vendas
@@ -122,6 +131,7 @@ module.exports = app => {
         globalFINAL = now();
         globalRESULTADOATUALIZA.unshift({"Tempo total de Processamento ": (globalFINAL-globalINICIO)/1000});
         globalRESULTADOATUALIZA.unshift({"Tempo total de Processamento por registro  ": (globalFINAL-globalINICIO)/1000/limit});
+        
         resposta.status(200).json(globalRESULTADOATUALIZA) 
     });
 

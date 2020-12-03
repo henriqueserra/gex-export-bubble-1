@@ -4,23 +4,23 @@ const vendavel = require('./vendavel');
 
 
 
-function extraiNotaFiscal(registro) {
-    const quantidadeItens = vendavel.qtdVendaveis(registro);
-    data = new Date(registro.criado);
-    data.setHours(data.getHours()-3);
-    const NotaFiscalJson = {
-        "CPF Cliente": registro.destCPF,
-        "Data": data,
-        "Estabelecimento" : globalESTABELECIMENTO.Estabelecimento,
-        "Itens": quantidadeItens,
-        "NFe": registro.nCFe,
-        "Numero_Caixa": registro.numeroCaixa,
-        "Valor total" : registro.valortotal,
-        "Venda_Manual": false,
-    }
-    globalRESULTADOATUALIZA.push({"JSON da nota fiscal a ser criada": NotaFiscalJson});
-
-    return (NotaFiscalJson);
+async function extraiNotaFiscal(registro) {
+    return new Promise((resolve, reject) => {
+        const quantidadeItens = vendavel.qtdVendaveis(registro);
+        data = new Date(registro.criado);
+        data.setHours(data.getHours()-3);
+        const NotaFiscalJson = {
+            "CPF Cliente": registro.destCPF,
+            "Data": data,
+            "Estabelecimento" : globalESTABELECIMENTO.Estabelecimento,
+            "Itens": quantidadeItens,
+            "NFe": registro.nCFe,
+            "Numero_Caixa": registro.numeroCaixa,
+            "Valor total" : registro.valortotal,
+            "Venda_Manual": false,
+        }
+        resolve (NotaFiscalJson);
+     });
 }
 
 async function registraNotaFiscalBubble(jsonNotaFiscal) {

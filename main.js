@@ -2,21 +2,17 @@ const crud = require('./crud');
 const biblioteca = require('./biblioteca');
 const meiodepagamento = require('./bibliotecas/meiodepagamento');
 const vendavel = require('./bibliotecas/vendavel')
+const diversos = require('./bibliotecas/diversos.js');
 
 
 async function  inicio() {
     console.clear();
-    // Carrega Estabelecimento
-    await biblioteca.buscaEstabalecimentoBubble()
-    console.log('Estabelecimentos carregados');
-    // 
-    // Carrega tabela de Vendáveis
-    vendaveis = await vendavel.buscaVendaveis();
-    console.log('Vendaveis carregados');
-    
-    await meiodepagamento.baixaMeiosdepagamento();
-    console.log('Meios de pagamento carregados');
-    console.log('Sistema disponível');
+    const promise1 = await biblioteca.buscaEstabalecimentoBubble();
+    const promise2 = await vendavel.buscaVendaveis();
+    const promise3 = await meiodepagamento.baixaMeiosdepagamento();
+    Promise.all([promise1,promise2, promise3]);
+    console.clear();
+    diversos.loga('Sistema disponível');
 
     
 };
