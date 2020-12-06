@@ -78,12 +78,16 @@ module.exports = app => {
         // Inicializa variável resultadodoposto
         var resultadodopost;
         // 
+        
         // Busca os dados no MongoDb
         const jsonresult = await getDados(limit);
+        // 
 
         do {
+            // Obtem o registro que será processado.
             const registro = JSON.parse(JSON.stringify(jsonresult[i]));
             // 
+            
             // Gera JSON para NotaFiscal
             const notaFiscalExtraida = await notafiscal.extraiNotaFiscal(registro);
             // 
