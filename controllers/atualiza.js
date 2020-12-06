@@ -84,6 +84,7 @@ module.exports = app => {
         // 
 
         do {
+            
             // Obtem o registro que será processado.
             const registro = JSON.parse(JSON.stringify(jsonresult[i]));
             // 
