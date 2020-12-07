@@ -1,11 +1,12 @@
 const axios = require('axios');
-const crud = require('../crud.js');
 const vendavel = require('./vendavel');
+const { controla } = require('./diversos');
 
 
 
 async function extraiNotaFiscal(registro) {
     return new Promise((resolve, reject) => {
+        controla({ 'extraiNotaFiscal chamada': new Date() });
         const quantidadeItens = vendavel.qtdVendaveis(registro);
         data = new Date(registro.criado);
         data.setHours(data.getHours()-3);
@@ -19,16 +20,21 @@ async function extraiNotaFiscal(registro) {
             "Valor total" : registro.valortotal,
             "Venda_Manual": false,
         }
+        controla({ 'NotaFiscalJson': NotaFiscalJson });
+        controla({ 'extraiNotaFiscal resolvida': new Date() });
         resolve (NotaFiscalJson);
      });
 }
 
 async function registraNotaFiscalBubble(jsonNotaFiscal) {
-    return new Promise ((resolve, reject) =>{
+    return new Promise((resolve, reject) => {
+        controla({ 'registraNotaFiscalBubble chamada': new Date() });
+        
         axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/wf/postnotafiscal/', jsonNotaFiscal)
         .then((respostaBubble)=>{
-            globalRESULTADOATUALIZA.push({"Resposta do POSTNOTAFISCAL": respostaBubble.data});
             globalIDNOTAFISCAL = respostaBubble.data.response.NotaFiscal;
+            controla({ 'registraNotaFiscalBubble': respostaBubble.data });
+            controla({ 'registraNotaFiscalBubble resolvida': new Date() });
             resolve(respostaBubble.data.response.NotaFiscal)})
         .catch((erroBubble)=>{
             console.log('Erro de lançamento no Bubble');

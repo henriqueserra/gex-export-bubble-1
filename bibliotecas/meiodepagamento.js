@@ -4,11 +4,13 @@ const vendavel = require('./vendavel');
 const notafiscal = require('./notafiscal');
 const diersos = require('./diversos');
 const diversos = require('./diversos');
+const { controla } = require('./diversos');
 
 // 
 // 
 // 
 async function trataMeiodepagamento(registro) {
+    controla({ 'trataMeiodepagamento chamado': new Date() });
     const quantidade = qtdMeiosdepagamento(registro);
     index = 0;
     do {
@@ -23,6 +25,7 @@ async function trataMeiodepagamento(registro) {
         idPagamento = await criaPagamento(idMeiodepagamento, registro.valormeiopagamento[index])
         index ++;
     } while (index < quantidade);
+    controla({ 'trataMeiodepagamento resolvido': new Date() });
     return ('ok');
 };
 // 
@@ -57,16 +60,18 @@ async function criaPagamento (idMeiodepagamento, valor){
 
 
 async function criaMeiodepagamento (codigoMeiodepagamento){
-    return new Promise ((resolve, reject) =>{
+    return new Promise((resolve, reject) => {
+        controla({'criaMeiodepagamento chamado': new Date()})
         novoMeiodepagamemto={
             "Estabelecimento" : globalESTABELECIMENTO.Estabelecimento,
             "CodMeiodepagamento" : codigoMeiodepagamento
         };
         axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/wf/postmeiodepagamento/', novoMeiodepagamemto)
-            .then((resposta) => {
+            .then(async (resposta) => {
+                controla({ 'Meio de pagamento criado': resposta.data });
                 diversos.loga('Meio de Pagamento Criado');
-            baixaMeiosdepagamento();
-            globalRESULTADOATUALIZA.push({"Meio de pagamento criado ": resposta.data});
+                await baixaMeiosdepagamento();
+                controla({ 'criaMeiodepagamento Resolvido': new Date() });
         resolve(resposta.data)})
         .catch((erroBubble)=>{
             console.log('Erro de lançamento no Bubble');
@@ -77,15 +82,20 @@ async function criaMeiodepagamento (codigoMeiodepagamento){
 
 
 async function baixaMeiosdepagamento() {
-    return new Promise ((resolve, reject) =>{
+    return new Promise((resolve, reject) => {
+        controla({ 'baixaMeiosdepagamento chamado': new Date() });
         axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/wf/getmeiosdepagamento/', globalESTABELECIMENTO)
-        .then((resposta)=>{
-            globalMEIOSDEPAGAMENTO = resposta.data.response.Meiosdepagamento;
-            diersos.loga('Meios de Pagamento carregados => '+ Object.keys(resposta.data.response.Meiosdepagamento).length);
-        resolve(resposta.data)})
-        .catch((erroBubble)=>{
-            console.log('Erro de lançamento no Bubble');
-            reject(erroBubble)})
+            .then((resposta) => {
+                controla({ 'Meios de Pagamento Baixados': resposta.data });
+                globalMEIOSDEPAGAMENTO = resposta.data.response.Meiosdepagamento;
+                diersos.loga('Meios de Pagamento carregados => ' + Object.keys(resposta.data.response.Meiosdepagamento).length);
+                controla({ 'baixaMeiosdepagamento resolvido': new Date() });
+                resolve(resposta.data)
+            })
+            .catch((erroBubble) => {
+                console.log('Erro de lançamento no Bubble');
+                reject(erroBubble)
+            });
     });
 }
 
@@ -94,15 +104,21 @@ function qtdMeiosdepagamento(registro){
     return(qtd);
 };
 
-function meiodepagamentoCadastrado(codigo){
+function meiodepagamentoCadastrado(codigo) {
+    controla({ 'meiodepagamentoCadastrado chamado': new Date() });
+    
     localizado = globalMEIOSDEPAGAMENTO.find(element => element.codigo_text === codigo)
     if (localizado === undefined) {
         // globalRESULTADOATUALIZA.push({"Meio de pagamento consultado":codigo});
         // globalRESULTADOATUALIZA.push({"Meio de pagamento cadastrado":false});
-        return(null)
+        controla({ 'Resultado se meio de pagamento existe': null });
+        controla({ 'meiodepagamentoCadastrado resolvido': new Date() });
+        return (null)
     } else {
         // globalRESULTADOATUALIZA.push({"Meio de pagamento cadastrado":true});
         // globalRESULTADOATUALIZA.push({"Meio de pagamento":localizado});
+        controla({ 'Resultado se meio de pagamento existe': localizado._id });
+        controla({ 'meiodepagamentoCadastrado resolvido': new Date() });
         return(localizado._id);
     }
 };
