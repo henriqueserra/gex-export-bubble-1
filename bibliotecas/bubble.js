@@ -1,13 +1,15 @@
 const axios = require('axios');
-const diversos = require('./diversos');
+const { loga } = require('./diversos');
+const { controla } = require('../bibliotecas/diversos');
+
 
 async function apagaBubble() {
-    return new Promise((resolve, reject)=>{
-        console.log('Apagando Registros do Bubble');
+    return new Promise((resolve, reject) => {
+        controla({ 'apagaBubble()': new Date() });
+        loga('Apagando Registros do Bubble');
         axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/wf/apaganotasfiscais/')
-        .then((resposta)=>{
-            globalRESULTADOATUALIZA.push({ "Apagados registros do Bubble ": resposta.data.status });
-            diversos.loga('Registros Bubble Apagados');
+            .then((resposta) => {
+            loga('Registros apagados');
             resolve(resposta.data)})
         .catch((erro)=>{reject(erro)})
     });

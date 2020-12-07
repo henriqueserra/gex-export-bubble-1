@@ -13,6 +13,7 @@ const vendavel = require('../bibliotecas/vendavel');
 const biblioteca = require('../biblioteca.js');
 const diversos = require('../bibliotecas/diversos');
 const main = require('../main.js');
+const { controla } = require('../bibliotecas/diversos');
 
 
 // Obtem os dados do MongoDb.
@@ -46,7 +47,8 @@ async function updateMongoDb(idMongo) {
 
 
 async function zeraStatusProcessado(){
-     return new Promise ((resolve, reject)=>{
+    return new Promise((resolve, reject) => {
+        controla({'zeraStatusProcessado no Mongo ': new Date() });
          VendasBubble.updateMany({}, { $set: { processado: false } }, { upsert: false }).then((correto) => {
              diversos.loga('Registros MongoDB resetados');
              resolve(correto);
@@ -69,7 +71,11 @@ module.exports = app => {
             const promise1 = await bubble.apagaBubble();
             const promise2 = await zeraStatusProcessado();
 
-            Promise.all([promise1, promise2]).then((valores)=>{console.log(valores);});
+            Promise.all([promise1, promise2]).then((valores) => {
+                controla({ 'Fim das Promisses': new Date() });
+                controla({ 'Resultado Apaga Bubble': valores[0] });
+                controla({ 'Resultado zeraStatusProcessado': valores[1] });
+            });
         }
         // 
         globalINICIO=now();
@@ -84,7 +90,7 @@ module.exports = app => {
         // 
 
         do {
-            
+
             // Obtem o registro que será processado.
             const registro = JSON.parse(JSON.stringify(jsonresult[i]));
             // 
