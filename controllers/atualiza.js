@@ -32,13 +32,16 @@ async function  getDados (limit){
 
 // Atualiza Dados no MongoDB
 async function updateMongoDb(idMongo) {
-    return new Promise ((resole, reject)=>{
+    return new Promise((resole, reject) => {
+        controla({ 'updateMongoDb Chamado': new Date() });
     VendasBubble.updateOne({_id: idMongo},{processado : true},{upsert: false})
-    .then ((respostaBubble)=>{
-        resole(respostaBubble)
+    .then ((respostamongo)=>{
+        controla({ 'updateMongoDb Resultado': respostamongo });
+        controla({ 'updateMongoDb Resolvido': new Date() });
+        resole(respostamongo)
     }).catch((erroBubble)=>{
         console.log(idMongo+' Erro ao atualizar no Mongo');
-        reject(erroBubble);
+        reject(erroMongo);
     });
 
     });
@@ -90,12 +93,13 @@ module.exports = app => {
         // 
 
         do {
+            controla({ '=======================================INÍCIO DE PROCESSAMENTO======================': new Date() });
 
             // Obtem o registro que será processado.
             const registro = JSON.parse(JSON.stringify(jsonresult[i]));
             // 
-            
             // Gera JSON para NotaFiscal
+            controla({ '=======================================NOTA FISCAL======================': new Date() });
             const notaFiscalExtraida = await notafiscal.extraiNotaFiscal(registro);
             // 
             // Grava NotaFiscal no Bubbe=le
@@ -103,37 +107,27 @@ module.exports = app => {
             // 
             // **** Trata Meio de Pagamento
             // 
+            controla({ '=======================================MEIO DE PAGAMENTO======================': new Date() });
             const promise1 = await meiodepagamento.trataMeiodepagamento(registro);
             // 
             // **** Trata Vendaveis
+            controla({ '=======================================VENDAVEIS======================': new Date() });
             const promise2 = await vendavel.trataVendaveis(registro)
-
-            Promise.all([notaFiscalExtraida, idNotaFiscal, promise1, promise2]);
-            
             // 
-
+            //  Resolve todas as Promises anteriores
+            Promise.all([notaFiscalExtraida, idNotaFiscal, promise1, promise2]);
+            // 
+            controla({ '================================================ VENDAS ======================': new Date() });
             // Gera JSON para Vendas
-            // vendasExtraida = await biblioteca.extraiVendas(registro,idNotaFiscal);
-            // globalRESULTADOATUALIZA.push({"Vendas extraídas JSON ": vendasExtraida});
-
-
-            // const quantidadeItensVendas = Object.keys(vendasExtraida).length;
-            // let index = 0
-            // do {
-            //     // vendasExtraidaJson = JSON.stringify(vendasExtraida[index])
-            //     vendasExtraidaJson = vendasExtraida[index];
-            //     vendaCriada =   await vendas.registraVendaBubble(vendasExtraidaJson);
-            //     // console.log('Venda Criada '+ JSON.stringify(vendaCriada.status));
-
-            //     index++;
-            // } while (index<quantidadeItensVendas);
-            // // 
-            // // Atualiza o registro no MongoDB 
-            // const resultadoDoUpdate = await updateMongoDb(registro._id);
-            // if (resultadoDoUpdate.ok == 1) {
-            //     console.log('Update no MongoDB "success"');
-            // }
-            // // 
+            const promise3 = await vendas.tratavendas(registro, idNotaFiscal);
+            controla({ '================================================ ATUALIZA MONGODB ======================': new Date() });
+            // Atualiza o registro no MongoDB 
+            const resultadoDoUpdate = await updateMongoDb(registro._id);
+            if (resultadoDoUpdate.ok == 1) {
+                console.log('Update no MongoDB "success"');
+            }
+            // 
+            
             i=i+1;
             console.log('Faltam '+ (limit-i)+' registros a serem processados');
         } while (i<limit);

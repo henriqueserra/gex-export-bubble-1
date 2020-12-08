@@ -69,7 +69,6 @@ async function criaMeiodepagamento (codigoMeiodepagamento){
         axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/wf/postmeiodepagamento/', novoMeiodepagamemto)
             .then(async (resposta) => {
                 controla({ 'Meio de pagamento criado': resposta.data });
-                diversos.loga('Meio de Pagamento Criado');
                 await baixaMeiosdepagamento();
                 controla({ 'criaMeiodepagamento Resolvido': new Date() });
         resolve(resposta.data)})
