@@ -33,22 +33,27 @@ async function trataMeiodepagamento(registro) {
 // 
 
 // Cria Pagamento
-async function criaPagamento (idMeiodepagamento, valor){
+async function criaPagamento(idMeiodepagamento, valor) {
+    controla({ 'Cria pagamento Chamado': new Date() });
     return new Promise ((resolve, reject) =>{
         novoPagamemto={
             "Estabelecimento" : globalESTABELECIMENTO.Estabelecimento,
-            "NotaFiscal" : globalIDNOTAFISCAL,
+            "NotaFiscal" : globalIDNOTAFISCAL._id,
             "idMeiodepagamento" : idMeiodepagamento,
             "valor" : valor
         };
+        controla({ 'Novo pagamento': novoPagamemto });
         axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/wf/postpagamento/', novoPagamemto)
-        .then((resposta)=>{
-            // baixaMeiosdepagamento();
-            globalRESULTADOATUALIZA.push({"Pagamento criado ": resposta.data});
-        resolve(resposta.data.response.Pagamento)})
-        .catch((erroBubble)=>{
-            console.log('Erro de lançamento no Bubble');
-            reject(erroBubble)})
+            .then((resposta) => {
+                // baixaMeiosdepagamento();
+                controla({ "Pagamento criado ": resposta.data });
+                controla({ 'Cria pagamento Resolvido': new Date() });
+                resolve(resposta.data.response.Pagamento)
+            })
+            .catch((erroBubble) => {
+                console.log('Erro de lançamento no Bubble');
+                reject(erroBubble)
+            });
     });
 
 };
@@ -60,12 +65,13 @@ async function criaPagamento (idMeiodepagamento, valor){
 
 
 async function criaMeiodepagamento (codigoMeiodepagamento){
+    controla({ 'criaMeiodepagamento chamado': new Date() });
     return new Promise((resolve, reject) => {
-        controla({'criaMeiodepagamento chamado': new Date()})
         novoMeiodepagamemto={
             "Estabelecimento" : globalESTABELECIMENTO.Estabelecimento,
             "CodMeiodepagamento" : codigoMeiodepagamento
         };
+        controla({ 'NovoMeiodePagamento': novoMeiodepagamemto });
         axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/wf/postmeiodepagamento/', novoMeiodepagamemto)
             .then(async (resposta) => {
                 controla({ 'Meio de pagamento criado': resposta.data });
@@ -85,7 +91,7 @@ async function baixaMeiosdepagamento() {
         controla({ 'baixaMeiosdepagamento chamado': new Date() });
         axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/wf/getmeiosdepagamento/', globalESTABELECIMENTO)
             .then((resposta) => {
-                controla({ 'Meios de Pagamento Baixados': resposta.data });
+                // controla({ 'Meios de Pagamento Baixados': resposta.data });
                 globalMEIOSDEPAGAMENTO = resposta.data.response.Meiosdepagamento;
                 diersos.loga('Meios de Pagamento carregados => ' + Object.keys(resposta.data.response.Meiosdepagamento).length);
                 controla({ 'baixaMeiosdepagamento resolvido': new Date() });
@@ -116,7 +122,7 @@ function meiodepagamentoCadastrado(codigo) {
     } else {
         // globalRESULTADOATUALIZA.push({"Meio de pagamento cadastrado":true});
         // globalRESULTADOATUALIZA.push({"Meio de pagamento":localizado});
-        controla({ 'Resultado se meio de pagamento existe': localizado._id });
+        controla({ 'Resultado se meio de pagamento existe': localizado });
         controla({ 'meiodepagamentoCadastrado resolvido': new Date() });
         return(localizado._id);
     }

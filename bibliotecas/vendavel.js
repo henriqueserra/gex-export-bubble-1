@@ -1,6 +1,7 @@
 const axios = require('axios');
 const diversos = require('./diversos');
 const { controla } = require('./diversos');
+const callerid = require('caller-id');
 
 
 function qtdVendaveis(registropassado) {
@@ -10,15 +11,15 @@ function qtdVendaveis(registropassado) {
     return(qtd);
 }
 function vendavelExiste(produto) {
-    controla({ 'vendavelExiste Chamado': new Date() });
+    // controla({ 'vendavelExiste Chamado': new Date() });
     const existe = globalVENDAVEIS.find(element => element.produto_text === produto);
     if (existe === undefined) {
-        controla({ 'Vendavel Existe ?': false });
-        controla({ 'vendavelExiste Resolvido': new Date() });
+        // controla({ 'Vendavel Existe ?': false });
+        // controla({ 'vendavelExiste Resolvido': new Date() });
     return false;
     } else {
-        controla({ 'Vendavel Existe ?': true });
-        controla({ 'vendavelExiste Chamado': new Date() });
+        // controla({ 'Vendavel Existe ?': true });
+        // controla({ 'vendavelExiste Chamado': new Date() });
      return true;   
     };
 
@@ -55,8 +56,9 @@ async function idVendavel(produto){
 };
 
 async function buscaVendaveis() {
+    controla({ 'Busca Vendaveis Chamado': new Date() });
+    controla({ 'Busca Vendaveis Chamado por': callerid.getData() });
     return new Promise((resolve, reject) => {
-        controla({ 'Busca Vendaveis Chamado': new Date() });
         estabelecimento = globalESTABELECIMENTO;
         const rota = process.env.API_GEX+process.env.API_VENDAVEIS
         axios.post(rota, estabelecimento)
@@ -69,8 +71,11 @@ async function buscaVendaveis() {
     });
 };
 
-async function criaVendavel(produto, codigo) {
+async function criaVendavel(produto, codigo, atualiza) {
     controla({ 'criaVendavel Chamado': new Date() });
+    if (atualiza !== false) {
+        atualiza = true;
+    }
     const novoVendavel = {
         "produto": produto,
         "estabelecimento": globalESTABELECIMENTO.Estabelecimento,
@@ -79,11 +84,18 @@ async function criaVendavel(produto, codigo) {
     controla({ 'postvendavel Chamado': new Date() });
     controla({ 'postvendavel': novoVendavel });
     const promise1 = await axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/wf/postvendavel/', novoVendavel);
-    const promise2 = await buscaVendaveis();
-    Promise.all([promise1, promise2]).then((valores) => { 
-        controla({ 'postvendavel resposta': valores[0].data });
-    });
+    if (atualiza) {
+        const promise2 = await buscaVendaveis();
+        Promise.all([promise1, promise2]).then((valores) => { 
+            controla({ 'postvendavel resposta': valores[0].data });
+        });
+    } else {
+        Promise.all([promise1]).then((valores) => { 
+            controla({ 'postvendavel resposta': valores[0].data });
+        });
+    }
     controla({ 'criaVendavel Resolvido': new Date() });
+    return (promise1.data.response.vendavel);
 };
 
 
@@ -93,4 +105,5 @@ module.exports={
     criaVendavel,
     trataVendaveis,
     idVendavel,
+    vendavelExiste,
 }

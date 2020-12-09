@@ -28,7 +28,7 @@ const connectDB = async() => {
         await mongoose.connect(URI, { useUnifiedTopology: true, useNewUrlParser: true });
     } catch (error) {
         console.log('=====================================');
-        console.log('           Erro ao conectar com o Bando ' + error);
+        console.log('           Erro ao conectar com o Banco ' + error);
         console.log('=====================================');
     }
 };

@@ -48,95 +48,98 @@ async function updateMongoDb(idMongo) {
 }
 // 
 
+async function apagaRegistros(teste) {
+    return new Promise(async (resolve, reject) => { 
+        controla({ 'Apaga registros Chamado': new Date() });
+        if (teste === "true") {
+            controla({ 'apagaBubble Chamado': new Date() });
+            bubble.apagaBubble().then((resultado1) => {
+                controla({ 'Resultado do apaga Bubble': resultado1 });
+                zeraStatusProcessado();
+            }).then((resultado2) => {
+                controla({ 'Resultado do zeraStatusProcessado': resultado2 });
+                
+            }).catch((erro) => {
+                controla({ 'Erro de execução': erro });
+                
+            }).finally(() => {
+                controla({ 'Fim das Promisses': new Date() });
+             });
+        };
+        controla({ 'Apaga registros Encerrado': new Date() });
+        resolve('OK');
+    });
+ };
 
 async function zeraStatusProcessado(){
     return new Promise((resolve, reject) => {
-        controla({'zeraStatusProcessado no Mongo ': new Date() });
+        controla({ 'Zera Mongodb Chamado': new Date() });
          VendasBubble.updateMany({}, { $set: { processado: false } }, { upsert: false }).then((correto) => {
              diversos.loga('Registros MongoDB resetados');
+             controla({ 'Zera Mongodb ': correto });
+             controla({ 'Zera Mongodb Encerrado': new Date() });
              resolve(correto);
          }).catch((errado) => reject(errado));
      })
 }
 
+function trataLimite(querystring) {
+    var limit = querystring || 1
+    limit = parseInt(limit);
+    return (limit);
+ };
 
 module.exports = app => {
     // ====================GET======================
     app.get('/atualiza', async (requisicao, resposta) => {
-        main.inicio();
-
-        globalRESULTADOATUALIZA=[];
+        await main.inicio();
         // Inicializa o parâmetro limit
-        let limit = null;
-        limit = requisicao.query.limit || 1
-        limit = parseInt(limit);
-        if (requisicao.query.apaga === "true") {
-            const promise1 = await bubble.apagaBubble();
-            const promise2 = await zeraStatusProcessado();
-
-            Promise.all([promise1, promise2]).then((valores) => {
-                controla({ 'Fim das Promisses': new Date() });
-                controla({ 'Resultado Apaga Bubble': valores[0] });
-                controla({ 'Resultado zeraStatusProcessado': valores[1] });
-            });
-        }
+        const limit = trataLimite(requisicao.query.limit);
+        // Apaga registros se necessário
+        await apagaRegistros(requisicao.query.apaga);
         // 
-        globalINICIO=now();
+        globalINICIO = now();
+        // Inicia Variáveis
         var executados = [];
         var i=0;
-        // Inicializa variável resultadodoposto
-        var resultadodopost;
-        // 
-        
         // Busca os dados no MongoDb
-        const jsonresult = await getDados(limit);
+            controla({ '=======================================BAIXA DADOS DO BUBBLE======================': new Date() });
+            const jsonresult = await getDados(limit);
         // 
-
         do {
             controla({ '=======================================INÍCIO DE PROCESSAMENTO======================': new Date() });
-
             // Obtem o registro que será processado.
             const registro = JSON.parse(JSON.stringify(jsonresult[i]));
-            // 
             // Gera JSON para NotaFiscal
             controla({ '=======================================NOTA FISCAL======================': new Date() });
             const notaFiscalExtraida = await notafiscal.extraiNotaFiscal(registro);
-            // 
             // Grava NotaFiscal no Bubbe=le
             const idNotaFiscal = await notafiscal.registraNotaFiscalBubble(notaFiscalExtraida);
-            // 
             // **** Trata Meio de Pagamento
-            // 
             controla({ '=======================================MEIO DE PAGAMENTO======================': new Date() });
             const promise1 = await meiodepagamento.trataMeiodepagamento(registro);
-            // 
             // **** Trata Vendaveis
             controla({ '=======================================VENDAVEIS======================': new Date() });
             const promise2 = await vendavel.trataVendaveis(registro)
-            // 
             //  Resolve todas as Promises anteriores
             Promise.all([notaFiscalExtraida, idNotaFiscal, promise1, promise2]);
-            // 
             controla({ '================================================ VENDAS ======================': new Date() });
             // Gera JSON para Vendas
             const promise3 = await vendas.tratavendas(registro, idNotaFiscal);
             controla({ '================================================ ATUALIZA MONGODB ======================': new Date() });
             // Atualiza o registro no MongoDB 
             const resultadoDoUpdate = await updateMongoDb(registro._id);
-            if (resultadoDoUpdate.ok == 1) {
-                console.log('Update no MongoDB "success"');
-            }
             // 
-            
-            i=i+1;
-            console.log('Faltam '+ (limit-i)+' registros a serem processados');
-        } while (i<limit);
-        // resposta.status(200).json(executados) 
+            i++;
+            console.log('Faltam ' + (limit - i) + ' registros a serem processados');
+        } while (i < limit);
+        
         globalFINAL = now();
         globalRESULTADOATUALIZA.unshift({"Tempo total de Processamento ": (globalFINAL-globalINICIO)/1000});
         globalRESULTADOATUALIZA.unshift({"Tempo total de Processamento por registro  ": (globalFINAL-globalINICIO)/1000/limit});
         
-        resposta.status(200).json(globalRESULTADOATUALIZA) 
+        resposta.status(200).json(globalRESULTADOATUALIZA);
+        console.log('Apaga = ' + requisicao.query.apaga);
     });
 
 

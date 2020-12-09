@@ -10,9 +10,13 @@ async function  inicio() {
     const promise1 = await biblioteca.buscaEstabalecimentoBubble();
     const promise2 = await vendavel.buscaVendaveis();
     const promise3 = await meiodepagamento.baixaMeiosdepagamento();
-    Promise.all([promise1,promise2, promise3]);
-    console.clear();
-    diversos.loga('Sistema disponível');
+    Promise.all([promise1, promise2, promise3]).then(function (valores) {
+        console.clear();
+        global.globalRESULTADOATUALIZA = [];
+        diversos.loga('Sistema disponível');
+    });
+    globalRESULTADOATUALIZA = null;
+    globalRESULTADOATUALIZA = [];
 
     
 };
