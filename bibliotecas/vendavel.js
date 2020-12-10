@@ -12,15 +12,16 @@ function qtdVendaveis(registropassado) {
 }
 function vendavelExiste(produto) {
     // controla({ 'vendavelExiste Chamado': new Date() });
-    const existe = globalVENDAVEIS.find(element => element.produto_text === produto);
-    if (existe === undefined) {
+    var existe = false;
+    existe = globalVENDAVEIS.find(element => element.produto_text === produto);
+    if (existe) {
         // controla({ 'Vendavel Existe ?': false });
         // controla({ 'vendavelExiste Resolvido': new Date() });
-    return false;
+    return true;
     } else {
         // controla({ 'Vendavel Existe ?': true });
         // controla({ 'vendavelExiste Chamado': new Date() });
-     return true;   
+     return false;   
     };
 
 };
@@ -47,7 +48,7 @@ async function trataVendaveis(registro) {
 
 async function idVendavel(produto){
     return new Promise((resolve, reject)=>{
-        const existe = globalVENDAVEIS.find(element => element.produto_text === produto);
+        const existe = globalVENDAVEIS.find(element => element.produto_text == produto);
         // const idProduto = JSON.parse(JSON.stringify(existe));
 
         resolve(existe._id)
@@ -58,16 +59,24 @@ async function idVendavel(produto){
 async function buscaVendaveis() {
     controla({ 'Busca Vendaveis Chamado': new Date() });
     controla({ 'Busca Vendaveis Chamado por': callerid.getData() });
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         estabelecimento = globalESTABELECIMENTO;
-        const rota = process.env.API_GEX+process.env.API_VENDAVEIS
-        axios.post(rota, estabelecimento)
-            .then((resposta) => {
-                globalVENDAVEIS = resposta.data.response.Vendavel;
-                controla({ 'Busca Vendaveis Resolvido': new Date() });
-                resolve(resposta.data.response.Vendavel);
-            })
-            .catch((erro) => { reject(erro) });
+        globalVENDAVEIS = new Array();
+        var cursor = 0;
+        var remaining = 10;
+        var qtd = 0;
+        do {
+            const rota = 'https://copiagexsyt.bubbleapps.io/version-test/api/1.1/obj/vendavel/';
+            params = new URLSearchParams([['cursor', cursor]]);
+            resposta = await axios.get(rota, { params });
+            qtd = resposta.data.response.results.length;
+            resposta.data.response.results.forEach(element => {
+                globalVENDAVEIS.push(element);
+            });
+            remaining = resposta.data.response.remaining;
+            cursor = cursor + 100;
+        } while (remaining>0);
+        resolve('ok');
     });
 };
 

@@ -15,7 +15,7 @@ async function trataMeiodepagamento(registro) {
     index = 0;
     do {
         const meioDePagamentoExiste = meiodepagamentoCadastrado(registro.meiopagamento[index]);
-        if (meioDePagamentoExiste === null) {
+        if (meioDePagamentoExiste == null) {
             diversos.loga('criando meio de pagamento');
             respostaCriacaoMeiodepagamento = await criaMeiodepagamento(registro.meiopagamento[index]);
             Promise.all([respostaCriacaoMeiodepagamento]);

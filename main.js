@@ -6,18 +6,20 @@ const diversos = require('./bibliotecas/diversos.js');
 
 
 async function  inicio() {
-    console.clear();
-    const promise1 = await biblioteca.buscaEstabalecimentoBubble();
-    const promise2 = await vendavel.buscaVendaveis();
-    const promise3 = await meiodepagamento.baixaMeiosdepagamento();
-    Promise.all([promise1, promise2, promise3]).then(function (valores) {
+    return new Promise(async (resolve, reject) => { 
         console.clear();
-        global.globalRESULTADOATUALIZA = [];
-        diversos.loga('Sistema disponível');
+        const promise1 = await biblioteca.buscaEstabalecimentoBubble();
+        const promise2 = await vendavel.buscaVendaveis();
+        const promise3 = await meiodepagamento.baixaMeiosdepagamento();
+        Promise.all([promise1, promise2, promise3]).then(function (valores) {
+            console.clear();
+            global.globalRESULTADOATUALIZA = [];
+            diversos.loga('Sistema disponível');
+            globalRESULTADOATUALIZA = null;
+            globalRESULTADOATUALIZA = [];
+            resolve('ok');
+        });
     });
-    globalRESULTADOATUALIZA = null;
-    globalRESULTADOATUALIZA = [];
-
     
 };
 

@@ -9,7 +9,6 @@ async function getDados() {
 };
 
 async function trataProdutos(registros) {
-    controla({ 'Produtos': Object.keys(registros.produto).length });
     return new Promise(async (resolve, reject) => {
         var indice = 0;
         var produtos = new Array();
@@ -37,8 +36,10 @@ async function cadastraProdutos(produtos) {
                 'produtocadastrado': produtos[indice].produto,
                 'id': resultado
             });
+            console.log('Produto ' + produtos[indice].produto + ' cadastrado');
         }
         indice++;
+        console.log('restam '+(quantidade-indice));
     } while (indice < quantidade);
     return (produtoscadastrados);
  };
