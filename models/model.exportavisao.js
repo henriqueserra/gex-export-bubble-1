@@ -12,6 +12,7 @@ const VendasBubbleSchema = new Schema({
     destCPF: String,
     destCNPJ: String,
     produto: [String],
+    codigoproduto: [String],
     preco: [Number],
     valortotal: Number,
     meiopagamento: [String],

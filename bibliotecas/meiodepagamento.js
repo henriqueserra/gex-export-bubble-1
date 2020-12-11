@@ -87,22 +87,45 @@ async function criaMeiodepagamento (codigoMeiodepagamento){
 
 
 async function baixaMeiosdepagamento() {
-    return new Promise((resolve, reject) => {
-        controla({ 'baixaMeiosdepagamento chamado': new Date() });
-        axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/wf/getmeiosdepagamento/', globalESTABELECIMENTO)
-            .then((resposta) => {
-                // controla({ 'Meios de Pagamento Baixados': resposta.data });
-                globalMEIOSDEPAGAMENTO = resposta.data.response.Meiosdepagamento;
-                diersos.loga('Meios de Pagamento carregados => ' + Object.keys(resposta.data.response.Meiosdepagamento).length);
-                controla({ 'baixaMeiosdepagamento resolvido': new Date() });
-                resolve(resposta.data)
-            })
-            .catch((erroBubble) => {
-                console.log('Erro de lançamento no Bubble');
-                reject(erroBubble)
+    controla({ 'Busca Meios de Pagamento Chamado': new Date() });
+    return new Promise(async (resolve, reject) => {
+        estabelecimento = globalESTABELECIMENTO;
+        globalMEIOSDEPAGAMENTO = new Array();
+        var cursor = 0;
+        var remaining = 10;
+        var qtd = 0;
+        do {
+            const rota = 'https://copiagexsyt.bubbleapps.io/version-test/api/1.1/obj/meiodepagamento';
+            params = new URLSearchParams([['cursor', cursor]]);
+            teste = '[{"key":"Estabelecimento","constraint_type":"equals","value":"' + estabelecimento.Estabelecimento + '"}]';
+            params.append('constraints', teste);
+            resposta = await axios.get(rota, { params });
+            qtd = resposta.data.response.results.length;
+            resposta.data.response.results.forEach(element => {
+                globalMEIOSDEPAGAMENTO.push(element);
             });
+            remaining = resposta.data.response.remaining;
+            cursor = cursor + 100;
+        } while (remaining > 0);
+        resolve('ok');
     });
-}
+
+    // return new Promise((resolve, reject) => {
+    //     controla({ 'baixaMeiosdepagamento chamado': new Date() });
+    //     axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/wf/getmeiosdepagamento/', globalESTABELECIMENTO)
+    //         .then((resposta) => {
+    //             // controla({ 'Meios de Pagamento Baixados': resposta.data });
+    //             globalMEIOSDEPAGAMENTO = resposta.data.response.Meiosdepagamento;
+    //             diersos.loga('Meios de Pagamento carregados => ' + Object.keys(resposta.data.response.Meiosdepagamento).length);
+    //             controla({ 'baixaMeiosdepagamento resolvido': new Date() });
+    //             resolve(resposta.data)
+    //         })
+    //         .catch((erroBubble) => {
+    //             console.log('Erro de lançamento no Bubble');
+    //             reject(erroBubble)
+    //         });
+    // });
+};
 
 function qtdMeiosdepagamento(registro){
     const qtd = Object.keys(registro.meiopagamento).length;
