@@ -12,7 +12,12 @@ function qtdVendaveis(registropassado) {
 }
 function vendavelExiste(produto) {
     var existe = false;
-    existe = globalVENDAVEIS.find(element => element.produto_text === produto);
+    globalVENDAVEIS.forEach(element => {
+        if (element.produto_text == produto) {
+            existe = true;
+        }
+    });
+    // existe = globalVENDAVEIS.find(element => element.produto_text == produto);
     if (existe) {
     return true;
     } else {
@@ -53,7 +58,7 @@ async function idVendavel(produto){
 
 async function buscaVendaveis() {
     controla({ 'Busca Vendaveis Chamado': new Date() });
-    // controla({ 'Busca Vendaveis Chamado por': callerid.getData() });
+    controla({ 'Busca Vendaveis Chamado por': callerid.getData() });
     return new Promise(async (resolve, reject) => {
         estabelecimento = globalESTABELECIMENTO;
         globalVENDAVEIS = new Array();
@@ -73,9 +78,20 @@ async function buscaVendaveis() {
             remaining = resposta.data.response.remaining;
             cursor = cursor + 100;
         } while (remaining>0);
-        resolve('ok');
+        resolve(globalVENDAVEIS);
     });
 };
+
+async function gravaVendavelBulk(registros) {
+    const resultado = await axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/obj/vendavel/bulk',
+    registros,
+        {headers: {
+            "Content-Type": "text/plain"}
+        });
+    controla({ 'Bulk cria Vendaveis': resultado.status });
+    return (JSON.parse(resultado.status ));
+
+ };
 
 async function criaVendavel(produto, codigo, atualiza) {
     // controla({ 'criaVendavel Chamado': new Date() });
@@ -90,21 +106,21 @@ async function criaVendavel(produto, codigo, atualiza) {
         "estoque_number": 0,
         "valor_estoque_number": 0
     };
-    const novoVendavelJSON = JSON.stringify(novoVendavel);
-    // controla({ 'postvendavel': novoVendavel });
-        const promise1 = await axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/obj/vendavel', novoVendavel);
-    if (atualiza) {
-        const promise2 = await buscaVendaveis();
-        Promise.all([promise1, promise2]).then((valores) => { 
-            controla({ 'postvendavel resposta': valores[0].data });
-        });
-    } else {
-        Promise.all([promise1]).then((valores) => { 
-            controla({ 'postvendavel resposta': valores[0].data });
-        });
-    }
-    controla({ 'criaVendavel Resolvido': new Date() });
-    return (promise1.data.id);
+    globalNOVOSVENDAVEIS = globalNOVOSVENDAVEIS + JSON.stringify(novoVendavel) + '\n';
+    // // controla({ 'postvendavel': novoVendavel });
+    //     const promise1 = await axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/obj/vendavel', novoVendavel);
+    // if (atualiza) {
+    //     const promise2 = await buscaVendaveis();
+    //     Promise.all([promise1, promise2]).then((valores) => { 
+    //         controla({ 'postvendavel resposta': valores[0].data });
+    //     });
+    // } else {
+    //     Promise.all([promise1]).then((valores) => { 
+    //         controla({ 'postvendavel resposta': valores[0].data });
+    //     });
+    // }
+    // controla({ 'criaVendavel Resolvido': new Date() });
+    return ('ok');
 };
 
 
@@ -115,4 +131,5 @@ module.exports={
     trataVendaveis,
     idVendavel,
     vendavelExiste,
+    gravaVendavelBulk,
 }

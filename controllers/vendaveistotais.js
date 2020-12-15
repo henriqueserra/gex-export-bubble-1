@@ -1,15 +1,13 @@
 const vendavel = require('../bibliotecas/vendavel');
 const { controla } = require('../bibliotecas/diversos');
-const modeloVendasTotais = require('../models/model.vendaveis');
 const modeloExportavisao = require('../models/model.exportavisao');
 const main = require('../main');
+const { default: Axios } = require('axios');
 
 async function getDados() {
     const dados = await modeloExportavisao.find({}).distinct('produto');
     const dadossorteados = dados.sort();
     return (dadossorteados);
-    // const dados = modeloVendasTotais.find({});
-    // return (dados);
 };
 
 async function trataProdutos(registros) {
@@ -17,11 +15,6 @@ async function trataProdutos(registros) {
         var indice = 0;
         var produtos = new Array();
         do {
-            // produtos.push({
-            //     'produto': registros.produto[indice],
-            //     'codigoproduto': registros.codigoproduto[indice],
-            //     'produtoexistente': vendavel.vendavelExiste(registros.produto[indice])
-            // });
             produtos.push({
                 'produto': registros[indice],
                 'produtoexistente': vendavel.vendavelExiste(registros[indice])
@@ -53,21 +46,26 @@ async function checaCodigo(produto) {
 async function cadastraProdutos(produtos) {
     var indice = 0;
     var produtoscadastrados = new Array();
+    globalNOVOSVENDAVEIS = null;
+    var resultadobulk;
     const quantidade = Object.keys(produtos).length
     do {
         if (produtos[indice].produtoexistente===false) {
             codigo = await checaCodigo(produtos[indice].produto);
             var resultado = await vendavel.criaVendavel(produtos[indice].produto, codigo, false)
             produtoscadastrados.push({
-                'produtocadastrado': produtos[indice].produto,
+                'produto cadastrando': produtos[indice].produto,
                 'id': resultado
             });
-            console.log('Produto ' + produtos[indice].produto + ' cadastrado');
+            console.log('Produto ' + produtos[indice].produto + ' cadastrando');
         }
         indice++;
         console.log('restam '+(quantidade-indice));
     } while (indice < quantidade);
-    return (produtoscadastrados);
+    if (globalNOVOSVENDAVEIS) {
+        resultadobulk = await vendavel.gravaVendavelBulk(globalNOVOSVENDAVEIS);
+    }
+    return (resultadobulk);
  };
 
 
@@ -75,6 +73,7 @@ module.exports = app => {
     app.get('/populavendaveis', async (requisicao, resposta) => {
         // Carrega informações
         await main.inicio();
+        await vendavel.buscaVendaveis();
         // Obtem dados
         const registros = await getDados();
         // const produtos = await trataProdutos(registros[0]);
@@ -82,6 +81,24 @@ module.exports = app => {
         controla({ 'Produtos Abertos': produtos });
         const produtoscomid = await cadastraProdutos(produtos);
         controla({ 'Produtos Cadastrados': produtoscomid });
+        resposta.status(200).json(globalRESULTADOATUALIZA);
+        await main.inicio();
+    });
+    
+    app.get('/apagavendaveis', async (requisicao, resposta) => {
+        // Carrega informações
+        await main.inicio();
+        // Obtem dados
+        const registros = await vendavel.buscaVendaveis();
+        var index = 0;
+        globalRESULTADOATUALIZA = [];
+        do {
+            respostadelete = await Axios.delete('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/obj/vendavel/' + globalVENDAVEIS[index]._id);
+            controla({ 'Resposta delete': globalVENDAVEIS[index].produto_text });
+            console.log('Resposta Delete -> ' + respostadelete.status);
+            console.log('Apagando '+ globalVENDAVEIS[index].produto_text);
+            index++;
+        } while (index<Object.keys(globalVENDAVEIS).length);
         resposta.status(200).json(globalRESULTADOATUALIZA);
         await main.inicio();
      });

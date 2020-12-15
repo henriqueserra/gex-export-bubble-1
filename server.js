@@ -10,6 +10,8 @@ global.globalRESULTADOATUALIZA=[];
 global.globalIDNOTAFISCAL='';
 global.globalINICIO = null;
 global.globalFINAL = null;
+global.globalCONNECTIONSTRING = process.env.CONNECTIONSTRING;
+global.globalNOVOSVENDAVEIS = '';
 
 
 // ===============================================

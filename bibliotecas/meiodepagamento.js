@@ -9,6 +9,41 @@ const { controla } = require('./diversos');
 // 
 // 
 // 
+
+async function trataMeiodepagamentoBulk(meiosdepagamento) {
+    var novosMeiosdepagamento = new Array();
+    meiosdepagamento.forEach(codigo => {
+        localizado = globalMEIOSDEPAGAMENTO.find(element => element === codigo);
+        console.log('Localizado ' + localizado);
+        if (!localizado) {
+            novosMeiosdepagamento.push({
+                'codigo_text': codigo.toString(),
+                "estabelecimento_custom_unidade":globalESTABELECIMENTO.Estabelecimento
+            });
+        }
+
+    });
+    const qtd = Object.keys(novosMeiosdepagamento).length;
+    if (qtd>0) {
+        const resultado = await gravaMeiodePagamentoBulk(novosMeiosdepagamento);
+        controla({ 'Resultado do Bulk ': resultado });
+    }
+    return (novosMeiosdepagamento);
+ };
+
+async function gravaMeiodePagamentoBulk(registros) { 
+    var registrosformatados = "";
+    registros.forEach(element => {
+        registrosformatados = registrosformatados + JSON.stringify(element)+'\r\n'
+    });
+    const resultado = await axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/obj/meiodepagamento/bulk',
+        registrosformatados,
+        {headers: {
+            "Content-Type": "text/plain"}
+        });
+    return (resultado.data);
+};
+
 async function trataMeiodepagamento(registro) {
     controla({ 'trataMeiodepagamento chamado': new Date() });
     const quantidade = qtdMeiosdepagamento(registro);
@@ -109,22 +144,6 @@ async function baixaMeiosdepagamento() {
         } while (remaining > 0);
         resolve('ok');
     });
-
-    // return new Promise((resolve, reject) => {
-    //     controla({ 'baixaMeiosdepagamento chamado': new Date() });
-    //     axios.post('https://copiagexsyt.bubbleapps.io/version-test/api/1.1/wf/getmeiosdepagamento/', globalESTABELECIMENTO)
-    //         .then((resposta) => {
-    //             // controla({ 'Meios de Pagamento Baixados': resposta.data });
-    //             globalMEIOSDEPAGAMENTO = resposta.data.response.Meiosdepagamento;
-    //             diersos.loga('Meios de Pagamento carregados => ' + Object.keys(resposta.data.response.Meiosdepagamento).length);
-    //             controla({ 'baixaMeiosdepagamento resolvido': new Date() });
-    //             resolve(resposta.data)
-    //         })
-    //         .catch((erroBubble) => {
-    //             console.log('Erro de lançamento no Bubble');
-    //             reject(erroBubble)
-    //         });
-    // });
 };
 
 function qtdMeiosdepagamento(registro){
@@ -154,4 +173,5 @@ function meiodepagamentoCadastrado(codigo) {
 module.exports = {
     baixaMeiosdepagamento,
     trataMeiodepagamento,
+    trataMeiodepagamentoBulk,
 };
