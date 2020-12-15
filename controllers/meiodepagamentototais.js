@@ -7,7 +7,7 @@ const meiodepagamento = require('../bibliotecas/meiodepagamento.js');
 module.exports = app => {
     app.get('/populameiodepagamento', async (requisicao, resposta) => {
         globalRESULTADOATUALIZA = new Array();
-        const registros = await mongo.obtemMeiosdepagamentoBubbble();
+        const registros = await mongo.obtemMeiosdepagamentoMongo();
         controla({ 'Meios de pagamento': registros });
         await meiodepagamento.baixaMeiosdepagamento();
         controla({ 'Meios de Pagamento no Bubble': globalMEIOSDEPAGAMENTO });
