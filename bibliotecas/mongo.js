@@ -63,7 +63,7 @@ async function obtemVendaveisMongo() {
   });
 }
 
-async function obtemNotasfiscaisMongo() {
+async function obtemNotasfiscaisMongo(limite) {
   return new Promise(async (resolve, reject) => {
     const client = await conexaoMongo();
     const comandoAggregate = [
@@ -148,12 +148,12 @@ async function obtemNotasfiscaisMongo() {
         },
       },
       {
-        $limit: 10,
-      },
-      {
         $sort: {
           criado: -1,
         },
+      },
+      {
+        $limit: limite,
       },
     ];
     var resultadofinal = new Array();
@@ -161,11 +161,14 @@ async function obtemNotasfiscaisMongo() {
     const resultado = await client
       .db("api")
       .collection("vendas")
-      .aggregate(comandoAggregate);
-    await resultado.forEach((element) => {
-      console.log(element);
-      resultadofinal.push(element);
-    });
+      .aggregate(comandoAggregate)
+      .toArray();
+    resultadofinal = resultado;
+
+    // await resultado.forEach((element) => {
+    //   console.log(element);
+    //   resultadofinal.push(element);
+    // });
     resolve(resultadofinal);
   });
 }
