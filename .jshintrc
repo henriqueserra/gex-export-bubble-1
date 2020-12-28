@@ -1,0 +1,13 @@
+{
+  "undef": true,
+  "unused": true,
+  "esversion": 8,
+  "eqnull": true,
+  "node": true,
+  "globals": {
+    "MY_GLOBAL": true,
+    "LOG": true,
+    "CONFIG": true,
+    "CACHE": true
+  }
+}

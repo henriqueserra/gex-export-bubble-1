@@ -1,6 +1,3 @@
-const { controla } = require("../bibliotecas/diversos");
-const main = require("../main");
-const { default: Axios } = require("axios");
 const bubble = require("../bibliotecas/bubble");
 
 module.exports = (app) => {

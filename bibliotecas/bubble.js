@@ -40,7 +40,7 @@ async function getEstabelecimentos() {
 }
 
 function montaConstraints(key, constrainttype, valor) {
-  params =
+  const params =
     '?constraints=[{"key":"' +
     key +
     '","constraint_type":"' +
