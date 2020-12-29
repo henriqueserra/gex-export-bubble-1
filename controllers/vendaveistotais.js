@@ -90,7 +90,7 @@ module.exports = (app) => {
     await main.inicio();
   });
 
-  app.get("/apagavendaveis", async (requisicao, resposta) => {
+  app.delete("/apagavendaveis", async (requisicao, resposta) => {
     // Carrega informações
     await main.inicio();
     // Obtem dados
