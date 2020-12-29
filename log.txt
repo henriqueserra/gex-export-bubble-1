@@ -1,0 +1,19 @@
+Tentando espabelecer conexão com o Banco de Dados
+Conexão com o Banco de Dados estabalecida
+consign v0.1.6 Initialized in C:\Users\Oito\Documents\GitHub\gex-export-bubble-1
++ .\controllers\atualiza.js
++ .\controllers\consultavendas.js
++ .\controllers\consultavisao.js
++ .\controllers\estabelecimento.js
++ .\controllers\meiodepagamentototais.js
++ .\controllers\raiz.js
++ .\controllers\vendastotais.js
++ .\controllers\vendaveistotais.js
++ .\controllers\vendavel.js
+servidor rodando na porta 3000
+Tue Dec 29 2020 14:10:56 GMT-0300 (Horário Padrão de Brasília) => Estabelecimentos carregados => 1
+Tue Dec 29 2020 14:10:57 GMT-0300 (Horário Padrão de Brasília) => Sistema disponível
+::1 - - [29/Dec/2020:17:11:02 +0000] "GET /log HTTP/1.1" 200 687 "-" "PostmanRuntime/7.26.8"
+::1 - - [29/Dec/2020:17:11:05 +0000] "GET /log HTTP/1.1" 200 780 "-" "PostmanRuntime/7.26.8"
+::1 - - [29/Dec/2020:17:11:06 +0000] "GET /log HTTP/1.1" 200 873 "-" "PostmanRuntime/7.26.8"
+::1 - - [29/Dec/2020:17:11:07 +0000] "GET /log HTTP/1.1" 200 966 "-" "PostmanRuntime/7.26.8"

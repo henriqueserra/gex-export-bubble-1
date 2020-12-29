@@ -22,4 +22,14 @@ module.exports = (app) => {
     );
     // client.close();
   });
+  app.get("/log", (requisicao, resposta) => {
+    const fs = require("fs");
+    try {
+      resposta.send(
+        fs.readFileSync("./log.txt", { encoding: "utf8", flag: "r" })
+      );
+    } catch (error) {
+      resposta.send(error);
+    }
+  });
 };
