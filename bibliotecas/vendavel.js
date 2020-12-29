@@ -50,12 +50,15 @@ async function trataVendaveis(registro) {
 async function idVendavel(produto) {
   return new Promise((resolve, reject) => {
     try {
-      const existe = globalVENDAVEIS.find(
+      let existe = globalVENDAVEIS.find(
         (element) => element.produto_text == produto
       );
       // const idProduto = JSON.parse(JSON.stringify(existe));
-
-      resolve(existe._id);
+      if (existe) {
+        resolve(existe._id);
+      } else {
+        resolve(false);
+      }
     } catch (error) {
       reject(error);
     }
